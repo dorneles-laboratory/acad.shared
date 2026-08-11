@@ -25,17 +25,17 @@ describe('updateUserSchema Unit Tests', () => {
     // Assert
     expect(result.success).toBe(true);
   });
-  it('should allow updating is_active', () => {
+  it('should allow updating isActive', () => {
     // Arrange
     const validUser = {
-      is_active: false,
+      isActive: false,
     };
     // Act
     const result = updateUserSchema.safeParse(validUser);
     // Assert
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.is_active).toBe(false);
+      expect(result.data.isActive).toBe(false);
     }
   });
   it('should fail validation password', () => {

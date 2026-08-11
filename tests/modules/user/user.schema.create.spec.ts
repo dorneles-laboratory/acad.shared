@@ -32,8 +32,8 @@ describe('createUserSchema Unit Tests', () => {
       // expect(result.data.address).toStrictEqual(validUser.address.trim());
       // Verifica se a string virou Date (z.coerce)
       // expect(result.data.birth_date).toBeInstanceOf(Date);
-      // Verifica se o default do is_active funcionou
-      expect(result.data.is_active).toBe(true);
+      // Verifica se o default do isActive funcionou
+      expect(result.data.isActive).toBe(true);
       // Verifica se o email foi transformado para lowercase
       expect(result.data.email).toBe(validUser.email.toLowerCase());
     }
@@ -64,8 +64,8 @@ describe('createUserSchema Unit Tests', () => {
       expect(result.data.password).toStrictEqual(validUser.password);
       // Verifica se o email foi transformado para lowercase
       expect(result.data.email).toBe(validUser.email.toLowerCase());
-      // Verifica se o default do is_active funcionou
-      expect(result.data.is_active).toBe(true);
+      // Verifica se o default do isActive funcionou
+      expect(result.data.isActive).toBe(true);
     }
   });
 

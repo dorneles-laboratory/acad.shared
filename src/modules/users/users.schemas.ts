@@ -68,7 +68,7 @@ export const createUserSchema = registry.register(
     //   example: 'Rua Exemplo, 123 - Cidade/UF',
     // }),
 
-    is_active: z.boolean().default(true).optional(),
+    isActive: z.boolean().default(true).optional(),
   }),
 );
 
@@ -90,7 +90,7 @@ export const updateUserSchema = createUserSchema
         example: 'NovaSenha@123',
       }),
 
-    is_active: z.boolean().optional(),
+    isActive: z.boolean().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'Pelo menos um campo deve ser fornecido para atualização.',
@@ -106,7 +106,7 @@ export const userResponseSchema = registry.register(
     // cellphone: z.string().nullable(),
     // birth_date: z.coerce.date().nullable(),
     // address: z.string().nullable(),
-    is_active: z.boolean(),
+    isActive: z.boolean(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
     // deletedAt: z.coerce.date().nullable(),
