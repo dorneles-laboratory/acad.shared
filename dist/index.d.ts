@@ -133,7 +133,7 @@ declare const propertyQuerySchema: z.ZodObject<{
     status: z.ZodDefault<z.ZodOptional<z.ZodUnion<readonly [z.ZodEnum<{
         readonly Active: "ACTIVE";
         readonly Configure: "CONFIGURE";
-    }>, z.ZodLiteral<"todas">]>>>;
+    }>, z.ZodLiteral<"all">]>>>;
 }, z.core.$strip>;
 
 declare const PropertyStatus: {

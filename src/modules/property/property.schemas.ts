@@ -65,9 +65,9 @@ export const propertyQuerySchema = z.object({
     example: 'Fazenda',
   }),
   status: z
-    .union([z.nativeEnum(PropertyStatus), z.literal('todas')])
+    .union([z.nativeEnum(PropertyStatus), z.literal('all')])
     .optional()
-    .default('todas')
+    .default('all')
     .openapi({
       description: 'Filtra pelo status da propriedade',
       example: PropertyStatus.Active,
