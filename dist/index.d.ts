@@ -381,6 +381,59 @@ declare const dashboardResponseSchema: z.ZodObject<{
 
 type DashboardResponseDTO = z.infer<typeof dashboardResponseSchema>;
 
+declare const createPropertySchema: z.ZodObject<{
+    name: z.ZodString;
+    location: z.ZodString;
+    car: z.ZodString;
+}, z.core.$strip>;
+declare const updatePropertySchema: z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    location: z.ZodOptional<z.ZodString>;
+    car: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Ativa: "ACTIVE";
+        readonly Configurar: "CONFIGURE";
+    }>>;
+}, z.core.$strip>;
+declare const propertyResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    location: z.ZodString;
+    car: z.ZodString;
+    status: z.ZodEnum<{
+        readonly Ativa: "ACTIVE";
+        readonly Configurar: "CONFIGURE";
+    }>;
+    ownerId: z.ZodString;
+    createdAt: z.ZodDate;
+    updatedAt: z.ZodDate;
+}, z.core.$strip>;
+declare const propertyIdSchema: z.ZodObject<{
+    id: z.ZodString;
+}, z.core.$strip>;
+declare const propertyQuerySchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    query: z.ZodOptional<z.ZodString>;
+    status: z.ZodDefault<z.ZodOptional<z.ZodUnion<readonly [z.ZodEnum<{
+        readonly Ativa: "ACTIVE";
+        readonly Configurar: "CONFIGURE";
+    }>, z.ZodLiteral<"todas">]>>>;
+}, z.core.$strip>;
+
+declare const PropertyStatus: {
+    readonly Ativa: "ACTIVE";
+    readonly Configurar: "CONFIGURE";
+};
+type EnumPropertyStatus = (typeof PropertyStatus)[keyof typeof PropertyStatus];
+
+type CreatePropertyDTO = z.infer<typeof createPropertySchema>;
+type UpdatePropertyDTO = z.infer<typeof updatePropertySchema>;
+type PropertyResponseDTO = z.infer<typeof propertyResponseSchema>;
+type PropertyIdDTO = z.infer<typeof propertyIdSchema>;
+type PropertyQueryDTO = z.infer<typeof propertyQuerySchema>;
+type PaginatedPropertiesDTO = PaginatedResultDTO<PropertyResponseDTO>;
+
 /**
  * Converte string "HH:mm" em minutos totais desde a meia-noite.
  */
@@ -394,4 +447,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type CreateProjectDTO, type CreateTaskDTO, type CreateTimeLogDTO, type CreateUserDTO, type DashboardResponseDTO, type EnumLoginStatus, type EnumProjectPriority, type EnumProjectRole, type EnumProjectStatus, type EnumTaskPriority, type EnumTaskRole, type EnumTaskStatus, type EnumTimeLogNature, type LoginAuthDTO, type PaginatedProjectsDTO, type PaginatedResultDTO, type PaginatedTasksDTO, type PaginatedTimeLogsDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type ProjectIdDTO, ProjectPriority, type ProjectResponseDTO, ProjectRole, ProjectStatus, type TaskIdDTO, TaskPriority, type TaskResponseDTO, TaskRole, TaskStatus, TimeLogNature, type TimeLogResponseDTO, type TokenPayloadDTO, type UpdateProjectDTO, type UpdateTaskDTO, type UpdateTimeLogDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, createPaginatedResponseSchema, createProjectSchema, createTaskSchema, createTimeLogSchema, createUserSchema, dashboardResponseSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginatedTimeLogsResponseSchema, paginationMetaSchema, paginationSchema, pendingTimeResponseSchema, projectIdSchema, projectResponseSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, taskIdSchema, taskResponseSchema, timeLogResponseSchema, timeStringToMinutes, toggleTimerResponseSchema, updateProjectSchema, updateTaskSchema, updateTimeLogSchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type CreateProjectDTO, type CreatePropertyDTO, type CreateTaskDTO, type CreateTimeLogDTO, type CreateUserDTO, type DashboardResponseDTO, type EnumLoginStatus, type EnumProjectPriority, type EnumProjectRole, type EnumProjectStatus, type EnumPropertyStatus, type EnumTaskPriority, type EnumTaskRole, type EnumTaskStatus, type EnumTimeLogNature, type LoginAuthDTO, type PaginatedProjectsDTO, type PaginatedPropertiesDTO, type PaginatedResultDTO, type PaginatedTasksDTO, type PaginatedTimeLogsDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type ProjectIdDTO, ProjectPriority, type ProjectResponseDTO, ProjectRole, ProjectStatus, type PropertyIdDTO, type PropertyQueryDTO, type PropertyResponseDTO, PropertyStatus, type TaskIdDTO, TaskPriority, type TaskResponseDTO, TaskRole, TaskStatus, TimeLogNature, type TimeLogResponseDTO, type TokenPayloadDTO, type UpdateProjectDTO, type UpdatePropertyDTO, type UpdateTaskDTO, type UpdateTimeLogDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, createPaginatedResponseSchema, createProjectSchema, createPropertySchema, createTaskSchema, createTimeLogSchema, createUserSchema, dashboardResponseSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginatedTimeLogsResponseSchema, paginationMetaSchema, paginationSchema, pendingTimeResponseSchema, projectIdSchema, projectResponseSchema, propertyIdSchema, propertyQuerySchema, propertyResponseSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, taskIdSchema, taskResponseSchema, timeLogResponseSchema, timeStringToMinutes, toggleTimerResponseSchema, updateProjectSchema, updatePropertySchema, updateTaskSchema, updateTimeLogSchema, updateUserSchema, userIdSchema, userResponseSchema };

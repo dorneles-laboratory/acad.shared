@@ -485,6 +485,72 @@ var dashboardResponseSchema = registry.register(
   })
 );
 
+// src/modules/property/property.enums.ts
+var PropertyStatus = {
+  Ativa: "ACTIVE",
+  Configurar: "CONFIGURE"
+};
+
+// src/modules/property/property.schemas.ts
+var createPropertySchema = registry.register(
+  "CreatePropertyRequest",
+  z.object({
+    name: z.string().min(2).max(120).trim().openapi({
+      description: "Nome da propriedade",
+      example: "Fazenda Rio Grande"
+    }),
+    location: z.string().min(2).max(120).trim().openapi({
+      description: "Localiza\xE7\xE3o/Cidade da propriedade",
+      example: "Santa Maria, RS"
+    }),
+    car: z.string().min(5).trim().openapi({
+      description: "Cadastro Ambiental Rural (CAR)",
+      example: "RS-4316907-1A2B3C4D5E6F7G8H9I0J"
+    })
+  })
+);
+var updatePropertySchema = registry.register(
+  "UpdatePropertyRequest",
+  createPropertySchema.extend({
+    status: z.nativeEnum(PropertyStatus).openapi({
+      description: "Status de configura\xE7\xE3o da propriedade",
+      example: PropertyStatus.Ativa
+    })
+  }).partial().refine((data) => Object.keys(data).length > 0, {
+    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
+  })
+);
+var propertyResponseSchema = registry.register(
+  "PropertyResponse",
+  z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    location: z.string(),
+    car: z.string(),
+    status: z.nativeEnum(PropertyStatus),
+    ownerId: z.string().uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+  })
+);
+var propertyIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID da propriedade deve ser um UUID v\xE1lido." }).openapi({
+    param: { name: "id", in: "path" }
+  })
+});
+var propertyQuerySchema = z.object({
+  page: z.coerce.number().optional().default(1),
+  limit: z.coerce.number().optional().default(10),
+  query: z.string().optional().openapi({
+    description: "Busca por nome, cidade ou CAR",
+    example: "Fazenda"
+  }),
+  status: z.union([z.nativeEnum(PropertyStatus), z.literal("todas")]).optional().default("todas").openapi({
+    description: "Filtra pelo status da propriedade",
+    example: PropertyStatus.Ativa
+  })
+});
+
 // src/common/common.schemas.ts
 var rfc7807ErrorSchema = registry.register(
   "ProblemDetails",
@@ -565,12 +631,14 @@ export {
   ProjectPriority,
   ProjectRole,
   ProjectStatus,
+  PropertyStatus,
   TaskPriority,
   TaskRole,
   TaskStatus,
   TimeLogNature,
   createPaginatedResponseSchema,
   createProjectSchema,
+  createPropertySchema,
   createTaskSchema,
   createTimeLogSchema,
   createUserSchema,
@@ -584,6 +652,9 @@ export {
   pendingTimeResponseSchema,
   projectIdSchema,
   projectResponseSchema,
+  propertyIdSchema,
+  propertyQuerySchema,
+  propertyResponseSchema,
   refreshTokenSchema,
   registry,
   rfc7807ErrorSchema,
@@ -593,6 +664,7 @@ export {
   timeStringToMinutes,
   toggleTimerResponseSchema,
   updateProjectSchema,
+  updatePropertySchema,
   updateTaskSchema,
   updateTimeLogSchema,
   updateUserSchema,

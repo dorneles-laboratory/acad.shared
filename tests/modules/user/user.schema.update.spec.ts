@@ -33,10 +33,10 @@ describe('updateUserSchema Unit Tests', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should allow updating is_active', () => {
+  it('should allow updating isActive', () => {
     // Arrange
     const validUser = {
-      is_active: false,
+      isActive: false,
     };
 
     // Act
@@ -46,7 +46,7 @@ describe('updateUserSchema Unit Tests', () => {
     expect(result.success).toBe(true);
 
     if (result.success) {
-      expect(result.data.is_active).toBe(false);
+      expect(result.data.isActive).toBe(false);
     }
   });
 
