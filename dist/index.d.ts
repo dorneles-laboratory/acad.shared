@@ -130,10 +130,10 @@ declare const propertyQuerySchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
     query: z.ZodOptional<z.ZodString>;
-    status: z.ZodDefault<z.ZodOptional<z.ZodUnion<readonly [z.ZodEnum<{
+    status: z.ZodOptional<z.ZodEnum<{
         readonly Active: "ACTIVE";
         readonly Configure: "CONFIGURE";
-    }>, z.ZodLiteral<"all">]>>>;
+    }>>;
 }, z.core.$strip>;
 
 declare const PropertyStatus: {
