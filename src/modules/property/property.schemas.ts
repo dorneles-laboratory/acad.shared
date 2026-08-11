@@ -64,12 +64,8 @@ export const propertyQuerySchema = z.object({
     description: 'Busca por nome, cidade ou CAR',
     example: 'Fazenda',
   }),
-  status: z
-    .union([z.nativeEnum(PropertyStatus), z.literal('todas')])
-    .optional()
-    .default('todas')
-    .openapi({
-      description: 'Filtra pelo status da propriedade',
-      example: PropertyStatus.Active,
-    }),
+  status: z.nativeEnum(PropertyStatus).optional().openapi({
+    description: 'Filtra pelo status da propriedade',
+    example: PropertyStatus.Active,
+  }),
 });
