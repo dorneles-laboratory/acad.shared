@@ -99,12 +99,12 @@ type PaginatedUsersDTO = PaginatedResultDTO<UserResponseDTO>;
 declare const createPropertySchema: z.ZodObject<{
     name: z.ZodString;
     location: z.ZodString;
-    car: z.ZodString;
+    car: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 declare const updatePropertySchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     location: z.ZodOptional<z.ZodString>;
-    car: z.ZodOptional<z.ZodString>;
+    car: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     status: z.ZodOptional<z.ZodEnum<{
         readonly Active: "ACTIVE";
         readonly Configure: "CONFIGURE";
