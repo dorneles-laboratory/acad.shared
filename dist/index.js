@@ -170,6 +170,7 @@ var propertyResponseSchema = registry.register(
     car: z.string(),
     status: z.nativeEnum(PropertyStatus),
     ownerId: z.string().uuid(),
+    owner: z.string(),
     createdAt: z.date(),
     updatedAt: z.date()
   })

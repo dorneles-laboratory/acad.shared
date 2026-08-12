@@ -120,6 +120,7 @@ declare const propertyResponseSchema: z.ZodObject<{
         readonly Configure: "CONFIGURE";
     }>;
     ownerId: z.ZodString;
+    owner: z.ZodString;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
