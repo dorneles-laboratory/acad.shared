@@ -12,7 +12,7 @@ export const createPropertySchema = registry.register(
       description: 'Localização/Cidade da propriedade',
       example: 'Santa Maria, RS',
     }),
-    car: z.string().min(5).trim().openapi({
+    car: z.string().min(5).trim().optional().openapi({
       description: 'Cadastro Ambiental Rural (CAR)',
       example: 'RS-4316907-1A2B3C4D5E6F7G8H9I0J',
     }),
