@@ -1,4 +1,5 @@
 import { z, registry } from '../../lib/registry';
+import { userResponseSchema } from '../users';
 import { PropertyStatus } from './property.enums';
 
 export const createPropertySchema = registry.register(
@@ -43,10 +44,7 @@ export const propertyResponseSchema = registry.register(
     car: z.string().nullable(),
     status: z.nativeEnum(PropertyStatus),
     ownerId: z.string().uuid(),
-    owner: {
-      id: z.string().uuid(),
-      name: z.string(),
-    },
+    owner: userResponseSchema,
     createdAt: z.date(),
     updatedAt: z.date(),
   }),
