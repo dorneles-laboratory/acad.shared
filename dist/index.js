@@ -167,10 +167,13 @@ var propertyResponseSchema = registry.register(
     id: z.string().uuid(),
     name: z.string(),
     location: z.string(),
-    car: z.string(),
+    car: z.string().nullable(),
     status: z.nativeEnum(PropertyStatus),
     ownerId: z.string().uuid(),
-    owner: z.string(),
+    owner: {
+      id: z.string().uuid(),
+      name: z.string()
+    },
     createdAt: z.date(),
     updatedAt: z.date()
   })
