@@ -114,13 +114,16 @@ declare const propertyResponseSchema: z.ZodObject<{
     id: z.ZodString;
     name: z.ZodString;
     location: z.ZodString;
-    car: z.ZodString;
+    car: z.ZodNullable<z.ZodString>;
     status: z.ZodEnum<{
         readonly Active: "ACTIVE";
         readonly Configure: "CONFIGURE";
     }>;
     ownerId: z.ZodString;
-    owner: z.ZodString;
+    owner: {
+        id: z.ZodString;
+        name: z.ZodString;
+    };
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
