@@ -120,14 +120,14 @@ declare const propertyResponseSchema: z.ZodObject<{
         readonly Configure: "CONFIGURE";
     }>;
     ownerId: z.ZodString;
-    owner: z.ZodObject<{
+    owner: z.ZodOptional<z.ZodObject<{
         id: z.ZodString;
         name: z.ZodString;
         email: z.ZodString;
         isActive: z.ZodBoolean;
         created_at: z.ZodCoercedDate<unknown>;
         updated_at: z.ZodCoercedDate<unknown>;
-    }, z.core.$strip>;
+    }, z.core.$strip>>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
@@ -157,6 +157,99 @@ type PropertyIdDTO = z.infer<typeof propertyIdSchema>;
 type PropertyQueryDTO = z.infer<typeof propertyQuerySchema>;
 type PaginatedPropertiesDTO = PaginatedResultDTO<PropertyResponseDTO>;
 
+declare const coordinateSchema: z.ZodObject<{
+    x: z.ZodNumber;
+    y: z.ZodNumber;
+}, z.core.$strip>;
+declare const createFieldSchema: z.ZodObject<{
+    name: z.ZodString;
+    soilType: z.ZodOptional<z.ZodString>;
+    coordinates: z.ZodArray<z.ZodObject<{
+        x: z.ZodNumber;
+        y: z.ZodNumber;
+    }, z.core.$strip>>;
+    propertyId: z.ZodString;
+}, z.core.$strip>;
+declare const updateFieldSchema: z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    soilType: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    coordinates: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        x: z.ZodNumber;
+        y: z.ZodNumber;
+    }, z.core.$strip>>>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Ready: "READY";
+        readonly Processing: "PROCESSING";
+        readonly Waiting: "WAITING";
+    }>>;
+}, z.core.$strip>;
+declare const fieldResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    code: z.ZodString;
+    soilType: z.ZodNullable<z.ZodString>;
+    area: z.ZodNullable<z.ZodNumber>;
+    perimeter: z.ZodNullable<z.ZodNumber>;
+    coordinates: z.ZodNullable<z.ZodAny>;
+    status: z.ZodEnum<{
+        readonly Ready: "READY";
+        readonly Processing: "PROCESSING";
+        readonly Waiting: "WAITING";
+    }>;
+    propertyId: z.ZodString;
+    property: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        location: z.ZodString;
+        car: z.ZodNullable<z.ZodString>;
+        status: z.ZodEnum<{
+            readonly Active: "ACTIVE";
+            readonly Configure: "CONFIGURE";
+        }>;
+        ownerId: z.ZodString;
+        owner: z.ZodOptional<z.ZodObject<{
+            id: z.ZodString;
+            name: z.ZodString;
+            email: z.ZodString;
+            isActive: z.ZodBoolean;
+            created_at: z.ZodCoercedDate<unknown>;
+            updated_at: z.ZodCoercedDate<unknown>;
+        }, z.core.$strip>>;
+        createdAt: z.ZodDate;
+        updatedAt: z.ZodDate;
+    }, z.core.$strip>>;
+    createdAt: z.ZodDate;
+    updatedAt: z.ZodDate;
+}, z.core.$strip>;
+declare const fieldIdSchema: z.ZodObject<{
+    id: z.ZodString;
+}, z.core.$strip>;
+declare const fieldQuerySchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    propertyId: z.ZodOptional<z.ZodString>;
+    query: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Ready: "READY";
+        readonly Processing: "PROCESSING";
+        readonly Waiting: "WAITING";
+    }>>;
+}, z.core.$strip>;
+
+declare const FieldStatus: {
+    readonly Ready: "READY";
+    readonly Processing: "PROCESSING";
+    readonly Waiting: "WAITING";
+};
+type EnumFieldStatus = (typeof FieldStatus)[keyof typeof FieldStatus];
+
+type CreateFieldDTO = z.infer<typeof createFieldSchema>;
+type UpdateFieldDTO = z.infer<typeof updateFieldSchema>;
+type FieldResponseDTO = z.infer<typeof fieldResponseSchema>;
+type FieldIdDTO = z.infer<typeof fieldIdSchema>;
+type FieldQueryDTO = z.infer<typeof fieldQuerySchema>;
+type PaginatedFieldsDTO = PaginatedResultDTO<FieldResponseDTO>;
+
 /**
  * Converte string "HH:mm" em minutos totais desde a meia-noite.
  */
@@ -170,4 +263,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type CreatePropertyDTO, type CreateUserDTO, type EnumLoginStatus, type EnumPropertyStatus, type LoginAuthDTO, type PaginatedPropertiesDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type PropertyIdDTO, type PropertyQueryDTO, type PropertyResponseDTO, PropertyStatus, type TokenPayloadDTO, type UpdatePropertyDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, createPaginatedResponseSchema, createPropertySchema, createUserSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, propertyIdSchema, propertyQuerySchema, propertyResponseSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updatePropertySchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type CreateFieldDTO, type CreatePropertyDTO, type CreateUserDTO, type EnumFieldStatus, type EnumLoginStatus, type EnumPropertyStatus, type FieldIdDTO, type FieldQueryDTO, type FieldResponseDTO, FieldStatus, type LoginAuthDTO, type PaginatedFieldsDTO, type PaginatedPropertiesDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type PropertyIdDTO, type PropertyQueryDTO, type PropertyResponseDTO, PropertyStatus, type TokenPayloadDTO, type UpdateFieldDTO, type UpdatePropertyDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, coordinateSchema, createFieldSchema, createPaginatedResponseSchema, createPropertySchema, createUserSchema, fieldIdSchema, fieldQuerySchema, fieldResponseSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, propertyIdSchema, propertyQuerySchema, propertyResponseSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateFieldSchema, updatePropertySchema, updateUserSchema, userIdSchema, userResponseSchema };

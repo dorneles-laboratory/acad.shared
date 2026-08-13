@@ -170,7 +170,7 @@ var propertyResponseSchema = registry.register(
     car: z.string().nullable(),
     status: z.nativeEnum(PropertyStatus),
     ownerId: z.string().uuid(),
-    owner: userResponseSchema,
+    owner: userResponseSchema.optional(),
     createdAt: z.date(),
     updatedAt: z.date()
   })
@@ -190,6 +190,86 @@ var propertyQuerySchema = z.object({
   status: z.nativeEnum(PropertyStatus).optional().openapi({
     description: "Filtra pelo status da propriedade",
     example: PropertyStatus.Active
+  })
+});
+
+// src/modules/field/field.enums.ts
+var FieldStatus = {
+  Ready: "READY",
+  Processing: "PROCESSING",
+  Waiting: "WAITING"
+};
+
+// src/modules/field/field.schemas.ts
+var coordinateSchema = z.object({
+  x: z.number(),
+  y: z.number()
+});
+var createFieldSchema = registry.register(
+  "CreateFieldRequest",
+  z.object({
+    name: z.string().min(2).max(120).trim().openapi({
+      description: "Nome do talh\xE3o",
+      example: "Talh\xE3o da Sede"
+    }),
+    soilType: z.string().optional().openapi({
+      description: "Tipo de solo",
+      example: "Latossolo Vermelho"
+    }),
+    coordinates: z.array(coordinateSchema).min(3).openapi({
+      description: "V\xE9rtices do pol\xEDgono desenhado"
+    }),
+    propertyId: z.string().uuid().openapi({
+      description: "ID da propriedade a qual este talh\xE3o pertence"
+    })
+  })
+);
+var updateFieldSchema = registry.register(
+  "UpdateFieldRequest",
+  createFieldSchema.omit({ propertyId: true }).extend({
+    status: z.nativeEnum(FieldStatus).openapi({
+      description: "Status de processamento do talh\xE3o",
+      example: FieldStatus.Ready
+    })
+  }).partial().refine((data) => Object.keys(data).length > 0, {
+    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
+  })
+);
+var fieldResponseSchema = registry.register(
+  "FieldResponse",
+  z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    code: z.string(),
+    soilType: z.string().nullable(),
+    area: z.number().nullable(),
+    perimeter: z.number().nullable(),
+    coordinates: z.any().nullable(),
+    status: z.nativeEnum(FieldStatus),
+    propertyId: z.string().uuid(),
+    property: propertyResponseSchema.optional(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+  })
+);
+var fieldIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID do talh\xE3o deve ser um UUID v\xE1lido." }).openapi({
+    param: { name: "id", in: "path" }
+  })
+});
+var fieldQuerySchema = z.object({
+  page: z.coerce.number().optional().default(1),
+  limit: z.coerce.number().optional().default(10),
+  propertyId: z.string().uuid().optional().openapi({
+    description: "Filtra os talh\xF5es por uma propriedade espec\xEDfica"
+  }),
+  query: z.string().optional().openapi({
+    description: "Busca por nome ou c\xF3digo do talh\xE3o",
+    example: "TAL-001"
+  }),
+  status: z.nativeEnum(FieldStatus).optional().openapi({
+    description: "Filtra pelo status do talh\xE3o",
+    example: FieldStatus.Ready
   })
 });
 
@@ -269,11 +349,17 @@ function formatMinutesToReadable(minutes) {
 }
 export {
   AuthEnums,
+  FieldStatus,
   OpenApiGeneratorV3,
   PropertyStatus,
+  coordinateSchema,
+  createFieldSchema,
   createPaginatedResponseSchema,
   createPropertySchema,
   createUserSchema,
+  fieldIdSchema,
+  fieldQuerySchema,
+  fieldResponseSchema,
   formatMinutesToReadable,
   loginSchema,
   minutesToDecimalHours,
@@ -286,6 +372,7 @@ export {
   registry,
   rfc7807ErrorSchema,
   timeStringToMinutes,
+  updateFieldSchema,
   updatePropertySchema,
   updateUserSchema,
   userIdSchema,
