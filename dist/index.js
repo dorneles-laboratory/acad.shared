@@ -336,6 +336,82 @@ function createPaginatedResponseSchema(schema, schemaName) {
     })
   );
 }
+var ipv4Schema = z.string().refine(
+  (value) => {
+    const parts = value.split(".");
+    return parts.length === 4 && parts.every((part) => {
+      if (!/^\d+$/.test(part)) return false;
+      const num = Number(part);
+      return num >= 0 && num <= 255;
+    });
+  },
+  {
+    message: "Endere\xE7o IPv4 inv\xE1lido."
+  }
+);
+
+// src/modules/screens/screens.enums.ts
+var ScreenStatus = {
+  Online: "ONLINE",
+  Offline: "OFFLINE",
+  Syncing: "SYNCING"
+};
+
+// src/modules/screens/screens.schemas.ts
+var createScreenSchema = registry.register(
+  "CreateScreenRequest",
+  z.object({
+    name: z.string().min(2).max(120).trim().openapi({
+      description: "Nome de identifica\xE7\xE3o da tela",
+      example: "Tela Recep\xE7\xE3o Principal"
+    }),
+    ip: ipv4Schema.openapi({
+      description: "Endere\xE7o IP do dispositivo na rede",
+      example: "192.168.1.50"
+    }),
+    buildingId: z.string().uuid().openapi({
+      description: "ID do pr\xE9dio onde a tela est\xE1 instalada",
+      example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
+    })
+  })
+);
+var updateScreenSchema = registry.register(
+  "UpdateScreenRequest",
+  z.object({
+    name: z.string().min(2).max(120).trim().optional(),
+    ip: ipv4Schema.optional(),
+    buildingId: z.string().uuid().optional(),
+    status: z.nativeEnum(ScreenStatus).optional()
+  }).refine((data) => Object.keys(data).length > 0, {
+    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
+  })
+);
+var screenResponseSchema = registry.register(
+  "ScreenResponse",
+  z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    ip: z.string(),
+    status: z.nativeEnum(ScreenStatus),
+    buildingId: z.string().uuid(),
+    building: buildingResponseSchema.optional(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date()
+  })
+);
+var screenIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID da tela deve ser um UUID v\xE1lido." }).openapi({
+    param: { name: "id", in: "path" }
+  })
+});
+var screenQuerySchema = z.object({
+  page: z.coerce.number().optional().default(1),
+  limit: z.coerce.number().optional().default(10),
+  query: z.string().optional().openapi({ description: "Busca por nome ou IP" }),
+  status: z.nativeEnum(ScreenStatus).optional(),
+  centerId: z.string().uuid().optional(),
+  buildingId: z.string().uuid().optional()
+});
 
 // src/utils/date-time.ts
 function timeStringToMinutes(timeString) {
@@ -356,6 +432,7 @@ function formatMinutesToReadable(minutes) {
 export {
   AuthEnums,
   OpenApiGeneratorV3,
+  ScreenStatus,
   SystemStatus,
   UserRole,
   buildingIdSchema,
@@ -367,8 +444,10 @@ export {
   createBuildingSchema,
   createCenterSchema,
   createPaginatedResponseSchema,
+  createScreenSchema,
   createUserSchema,
   formatMinutesToReadable,
+  ipv4Schema,
   loginSchema,
   minutesToDecimalHours,
   paginationMetaSchema,
@@ -376,9 +455,13 @@ export {
   refreshTokenSchema,
   registry,
   rfc7807ErrorSchema,
+  screenIdSchema,
+  screenQuerySchema,
+  screenResponseSchema,
   timeStringToMinutes,
   updateBuildingSchema,
   updateCenterSchema,
+  updateScreenSchema,
   updateUserSchema,
   userIdSchema,
   userResponseSchema,

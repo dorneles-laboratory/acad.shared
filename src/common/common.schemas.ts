@@ -80,3 +80,23 @@ export function createPaginatedResponseSchema(
     }),
   );
 }
+
+// --- Schema para Validação de Endereço IPv4 ---
+export const ipv4Schema = z.string().refine(
+  (value) => {
+    const parts = value.split('.');
+
+    return (
+      parts.length === 4 &&
+      parts.every((part) => {
+        if (!/^\d+$/.test(part)) return false;
+
+        const num = Number(part);
+        return num >= 0 && num <= 255;
+      })
+    );
+  },
+  {
+    message: 'Endereço IPv4 inválido.',
+  },
+);

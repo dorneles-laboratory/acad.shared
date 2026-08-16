@@ -124,6 +124,7 @@ declare function createPaginatedResponseSchema(schema: z.ZodTypeAny, schemaName:
         itemsPerPage: z.ZodNumber;
     }, z.core.$strip>;
 }, z.core.$strip>;
+declare const ipv4Schema: z.ZodString;
 
 type ProblemDetailsDTO = z.infer<typeof rfc7807ErrorSchema>;
 type PaginationMetaDTO = z.infer<typeof paginationMetaSchema>;
@@ -252,6 +253,76 @@ type CenterIdDTO = z.infer<typeof centerIdSchema>;
 type CenterQueryDTO = z.infer<typeof centerQuerySchema>;
 type PaginatedCentersDTO = PaginatedResultDTO<CenterResponseDTO>;
 
+declare const createScreenSchema: z.ZodObject<{
+    name: z.ZodString;
+    ip: z.ZodString;
+    buildingId: z.ZodString;
+}, z.core.$strip>;
+declare const updateScreenSchema: z.ZodObject<{
+    name: z.ZodOptional<z.ZodString>;
+    ip: z.ZodOptional<z.ZodString>;
+    buildingId: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Online: "ONLINE";
+        readonly Offline: "OFFLINE";
+        readonly Syncing: "SYNCING";
+    }>>;
+}, z.core.$strip>;
+declare const screenResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    ip: z.ZodString;
+    status: z.ZodEnum<{
+        readonly Online: "ONLINE";
+        readonly Offline: "OFFLINE";
+        readonly Syncing: "SYNCING";
+    }>;
+    buildingId: z.ZodString;
+    building: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        description: z.ZodNullable<z.ZodString>;
+        status: z.ZodEnum<{
+            readonly Active: "ACTIVE";
+            readonly Inactive: "INACTIVE";
+        }>;
+        centerId: z.ZodString;
+        createdAt: z.ZodDate;
+        updatedAt: z.ZodDate;
+    }, z.core.$strip>>;
+    createdAt: z.ZodCoercedDate<unknown>;
+    updatedAt: z.ZodCoercedDate<unknown>;
+}, z.core.$strip>;
+declare const screenIdSchema: z.ZodObject<{
+    id: z.ZodString;
+}, z.core.$strip>;
+declare const screenQuerySchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    query: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Online: "ONLINE";
+        readonly Offline: "OFFLINE";
+        readonly Syncing: "SYNCING";
+    }>>;
+    centerId: z.ZodOptional<z.ZodString>;
+    buildingId: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+
+declare const ScreenStatus: {
+    readonly Online: "ONLINE";
+    readonly Offline: "OFFLINE";
+    readonly Syncing: "SYNCING";
+};
+type EnumScreenStatus = (typeof ScreenStatus)[keyof typeof ScreenStatus];
+
+type CreateScreenDTO = z.infer<typeof createScreenSchema>;
+type UpdateScreenDTO = z.infer<typeof updateScreenSchema>;
+type ScreenResponseDTO = z.infer<typeof screenResponseSchema>;
+type ScreenIdDTO = z.infer<typeof screenIdSchema>;
+type ScreenQueryDTO = z.infer<typeof screenQuerySchema>;
+type PaginatedScreensDTO = PaginatedResultDTO<ScreenResponseDTO>;
+
 declare const SystemStatus: {
     readonly Active: "ACTIVE";
     readonly Inactive: "INACTIVE";
@@ -271,4 +342,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type CreateBuildingDTO, type CreateCenterDTO, type CreateUserDTO, type EnumLoginStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, createBuildingSchema, createCenterSchema, createPaginatedResponseSchema, createUserSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type CreateBuildingDTO, type CreateCenterDTO, type CreateScreenDTO, type CreateUserDTO, type EnumLoginStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateScreenDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, createBuildingSchema, createCenterSchema, createPaginatedResponseSchema, createScreenSchema, createUserSchema, formatMinutesToReadable, ipv4Schema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, screenIdSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateScreenSchema, updateUserSchema, userIdSchema, userResponseSchema };
