@@ -96,159 +96,117 @@ type UserIdDTO = z.infer<typeof userIdSchema>;
 type UserResponseDTO = z.infer<typeof userResponseSchema>;
 type PaginatedUsersDTO = PaginatedResultDTO<UserResponseDTO>;
 
-declare const createPropertySchema: z.ZodObject<{
+declare const createBuildingSchema: z.ZodObject<{
     name: z.ZodString;
-    location: z.ZodString;
-    car: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    centerId: z.ZodString;
 }, z.core.$strip>;
-declare const updatePropertySchema: z.ZodObject<{
+declare const updateBuildingSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
-    location: z.ZodOptional<z.ZodString>;
-    car: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    centerId: z.ZodOptional<z.ZodString>;
     status: z.ZodOptional<z.ZodEnum<{
         readonly Active: "ACTIVE";
-        readonly Configure: "CONFIGURE";
+        readonly Inactive: "INACTIVE";
     }>>;
 }, z.core.$strip>;
-declare const propertyResponseSchema: z.ZodObject<{
+declare const buildingResponseSchema: z.ZodObject<{
     id: z.ZodString;
     name: z.ZodString;
-    location: z.ZodString;
-    car: z.ZodNullable<z.ZodString>;
+    description: z.ZodNullable<z.ZodString>;
     status: z.ZodEnum<{
         readonly Active: "ACTIVE";
-        readonly Configure: "CONFIGURE";
+        readonly Inactive: "INACTIVE";
     }>;
-    ownerId: z.ZodString;
-    owner: z.ZodOptional<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        email: z.ZodString;
-        isActive: z.ZodBoolean;
-        created_at: z.ZodCoercedDate<unknown>;
-        updated_at: z.ZodCoercedDate<unknown>;
-    }, z.core.$strip>>;
+    centerId: z.ZodString;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
-declare const propertyIdSchema: z.ZodObject<{
+declare const buildingIdSchema: z.ZodObject<{
     id: z.ZodString;
 }, z.core.$strip>;
-declare const propertyQuerySchema: z.ZodObject<{
+declare const buildingQuerySchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
     query: z.ZodOptional<z.ZodString>;
+    centerId: z.ZodOptional<z.ZodString>;
     status: z.ZodOptional<z.ZodEnum<{
         readonly Active: "ACTIVE";
-        readonly Configure: "CONFIGURE";
+        readonly Inactive: "INACTIVE";
     }>>;
 }, z.core.$strip>;
 
-declare const PropertyStatus: {
-    readonly Active: "ACTIVE";
-    readonly Configure: "CONFIGURE";
-};
-type EnumPropertyStatus = (typeof PropertyStatus)[keyof typeof PropertyStatus];
+type CreateBuildingDTO = z.infer<typeof createBuildingSchema>;
+type UpdateBuildingDTO = z.infer<typeof updateBuildingSchema>;
+type BuildingResponseDTO = z.infer<typeof buildingResponseSchema>;
+type BuildingIdDTO = z.infer<typeof buildingIdSchema>;
+type BuildingQueryDTO = z.infer<typeof buildingQuerySchema>;
+type PaginatedBuildingsDTO = PaginatedResultDTO<BuildingResponseDTO>;
 
-type CreatePropertyDTO = z.infer<typeof createPropertySchema>;
-type UpdatePropertyDTO = z.infer<typeof updatePropertySchema>;
-type PropertyResponseDTO = z.infer<typeof propertyResponseSchema>;
-type PropertyIdDTO = z.infer<typeof propertyIdSchema>;
-type PropertyQueryDTO = z.infer<typeof propertyQuerySchema>;
-type PaginatedPropertiesDTO = PaginatedResultDTO<PropertyResponseDTO>;
-
-declare const coordinateSchema: z.ZodObject<{
-    x: z.ZodNumber;
-    y: z.ZodNumber;
-}, z.core.$strip>;
-declare const createFieldSchema: z.ZodObject<{
+declare const createCenterSchema: z.ZodObject<{
     name: z.ZodString;
-    soilType: z.ZodOptional<z.ZodString>;
-    coordinates: z.ZodArray<z.ZodObject<{
-        x: z.ZodNumber;
-        y: z.ZodNumber;
-    }, z.core.$strip>>;
-    propertyId: z.ZodString;
+    acronym: z.ZodString;
+    color: z.ZodString;
 }, z.core.$strip>;
-declare const updateFieldSchema: z.ZodObject<{
+declare const updateCenterSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
-    soilType: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    coordinates: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        x: z.ZodNumber;
-        y: z.ZodNumber;
-    }, z.core.$strip>>>;
+    acronym: z.ZodOptional<z.ZodString>;
+    color: z.ZodOptional<z.ZodString>;
     status: z.ZodOptional<z.ZodEnum<{
-        readonly Ready: "READY";
-        readonly Processing: "PROCESSING";
-        readonly Waiting: "WAITING";
+        readonly Active: "ACTIVE";
+        readonly Inactive: "INACTIVE";
     }>>;
 }, z.core.$strip>;
-declare const fieldResponseSchema: z.ZodObject<{
+declare const centerResponseSchema: z.ZodObject<{
     id: z.ZodString;
     name: z.ZodString;
-    code: z.ZodString;
-    soilType: z.ZodNullable<z.ZodString>;
-    area: z.ZodNullable<z.ZodNumber>;
-    perimeter: z.ZodNullable<z.ZodNumber>;
-    coordinates: z.ZodNullable<z.ZodAny>;
+    acronym: z.ZodString;
+    color: z.ZodString;
     status: z.ZodEnum<{
-        readonly Ready: "READY";
-        readonly Processing: "PROCESSING";
-        readonly Waiting: "WAITING";
+        readonly Active: "ACTIVE";
+        readonly Inactive: "INACTIVE";
     }>;
-    propertyId: z.ZodString;
-    property: z.ZodOptional<z.ZodObject<{
+    buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
         id: z.ZodString;
         name: z.ZodString;
-        location: z.ZodString;
-        car: z.ZodNullable<z.ZodString>;
+        description: z.ZodNullable<z.ZodString>;
         status: z.ZodEnum<{
             readonly Active: "ACTIVE";
-            readonly Configure: "CONFIGURE";
+            readonly Inactive: "INACTIVE";
         }>;
-        ownerId: z.ZodString;
-        owner: z.ZodOptional<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            email: z.ZodString;
-            isActive: z.ZodBoolean;
-            created_at: z.ZodCoercedDate<unknown>;
-            updated_at: z.ZodCoercedDate<unknown>;
-        }, z.core.$strip>>;
+        centerId: z.ZodString;
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
-    }, z.core.$strip>>;
+    }, z.core.$strip>>>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
-declare const fieldIdSchema: z.ZodObject<{
+declare const centerIdSchema: z.ZodObject<{
     id: z.ZodString;
 }, z.core.$strip>;
-declare const fieldQuerySchema: z.ZodObject<{
+declare const centerQuerySchema: z.ZodObject<{
     page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
     limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    propertyId: z.ZodOptional<z.ZodString>;
     query: z.ZodOptional<z.ZodString>;
     status: z.ZodOptional<z.ZodEnum<{
-        readonly Ready: "READY";
-        readonly Processing: "PROCESSING";
-        readonly Waiting: "WAITING";
+        readonly Active: "ACTIVE";
+        readonly Inactive: "INACTIVE";
     }>>;
+    includeBuildings: z.ZodDefault<z.ZodOptional<z.ZodCoercedBoolean<unknown>>>;
 }, z.core.$strip>;
 
-declare const FieldStatus: {
-    readonly Ready: "READY";
-    readonly Processing: "PROCESSING";
-    readonly Waiting: "WAITING";
-};
-type EnumFieldStatus = (typeof FieldStatus)[keyof typeof FieldStatus];
+type CreateCenterDTO = z.infer<typeof createCenterSchema>;
+type UpdateCenterDTO = z.infer<typeof updateCenterSchema>;
+type CenterResponseDTO = z.infer<typeof centerResponseSchema>;
+type CenterIdDTO = z.infer<typeof centerIdSchema>;
+type CenterQueryDTO = z.infer<typeof centerQuerySchema>;
+type PaginatedCentersDTO = PaginatedResultDTO<CenterResponseDTO>;
 
-type CreateFieldDTO = z.infer<typeof createFieldSchema>;
-type UpdateFieldDTO = z.infer<typeof updateFieldSchema>;
-type FieldResponseDTO = z.infer<typeof fieldResponseSchema>;
-type FieldIdDTO = z.infer<typeof fieldIdSchema>;
-type FieldQueryDTO = z.infer<typeof fieldQuerySchema>;
-type PaginatedFieldsDTO = PaginatedResultDTO<FieldResponseDTO>;
+declare const SystemStatus: {
+    readonly Active: "ACTIVE";
+    readonly Inactive: "INACTIVE";
+};
+type EnumSystemStatus = (typeof SystemStatus)[keyof typeof SystemStatus];
 
 /**
  * Converte string "HH:mm" em minutos totais desde a meia-noite.
@@ -263,4 +221,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type CreateFieldDTO, type CreatePropertyDTO, type CreateUserDTO, type EnumFieldStatus, type EnumLoginStatus, type EnumPropertyStatus, type FieldIdDTO, type FieldQueryDTO, type FieldResponseDTO, FieldStatus, type LoginAuthDTO, type PaginatedFieldsDTO, type PaginatedPropertiesDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type PropertyIdDTO, type PropertyQueryDTO, type PropertyResponseDTO, PropertyStatus, type TokenPayloadDTO, type UpdateFieldDTO, type UpdatePropertyDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, coordinateSchema, createFieldSchema, createPaginatedResponseSchema, createPropertySchema, createUserSchema, fieldIdSchema, fieldQuerySchema, fieldResponseSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, propertyIdSchema, propertyQuerySchema, propertyResponseSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateFieldSchema, updatePropertySchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type CreateBuildingDTO, type CreateCenterDTO, type CreateUserDTO, type EnumLoginStatus, type EnumSystemStatus, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, createBuildingSchema, createCenterSchema, createPaginatedResponseSchema, createUserSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateUserSchema, userIdSchema, userResponseSchema };

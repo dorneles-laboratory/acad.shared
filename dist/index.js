@@ -126,150 +126,137 @@ var userIdSchema = z.object({
   })
 });
 
-// src/modules/property/property.enums.ts
-var PropertyStatus = {
+// src/common/common.enums.ts
+var SystemStatus = {
   Active: "ACTIVE",
-  Configure: "CONFIGURE"
+  Inactive: "INACTIVE"
 };
 
-// src/modules/property/property.schemas.ts
-var createPropertySchema = registry.register(
-  "CreatePropertyRequest",
+// src/modules/buildings/building.schemas.ts
+var createBuildingSchema = registry.register(
+  "CreateBuildingRequest",
   z.object({
     name: z.string().min(2).max(120).trim().openapi({
-      description: "Nome da propriedade",
-      example: "Fazenda Rio Grande"
+      description: "Nome do pr\xE9dio",
+      example: "Bloco C"
     }),
-    location: z.string().min(2).max(120).trim().openapi({
-      description: "Localiza\xE7\xE3o/Cidade da propriedade",
-      example: "Santa Maria, RS"
+    description: z.string().max(255).trim().optional().openapi({
+      description: "Descri\xE7\xE3o de localiza\xE7\xE3o ou uso do pr\xE9dio",
+      example: "Salas de aula e laborat\xF3rios"
     }),
-    car: z.string().min(5).trim().optional().openapi({
-      description: "Cadastro Ambiental Rural (CAR)",
-      example: "RS-4316907-1A2B3C4D5E6F7G8H9I0J"
+    centerId: z.string().uuid().openapi({
+      description: "ID do centro ao qual o pr\xE9dio pertence",
+      example: "123e4567-e89b-12d3-a456-426614174000"
     })
   })
 );
-var updatePropertySchema = registry.register(
-  "UpdatePropertyRequest",
-  createPropertySchema.extend({
-    status: z.nativeEnum(PropertyStatus).openapi({
-      description: "Status de configura\xE7\xE3o da propriedade",
-      example: PropertyStatus.Active
+var updateBuildingSchema = registry.register(
+  "UpdateBuildingRequest",
+  createBuildingSchema.extend({
+    status: z.nativeEnum(SystemStatus).openapi({
+      description: "Status do pr\xE9dio",
+      example: SystemStatus.Active
     })
   }).partial().refine((data) => Object.keys(data).length > 0, {
     message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
   })
 );
-var propertyResponseSchema = registry.register(
-  "PropertyResponse",
+var buildingResponseSchema = registry.register(
+  "BuildingResponse",
   z.object({
     id: z.string().uuid(),
     name: z.string(),
-    location: z.string(),
-    car: z.string().nullable(),
-    status: z.nativeEnum(PropertyStatus),
-    ownerId: z.string().uuid(),
-    owner: userResponseSchema.optional(),
+    description: z.string().nullable(),
+    status: z.nativeEnum(SystemStatus),
+    centerId: z.string().uuid(),
     createdAt: z.date(),
     updatedAt: z.date()
   })
 );
-var propertyIdSchema = z.object({
-  id: z.string().uuid({ message: "O ID da propriedade deve ser um UUID v\xE1lido." }).openapi({
+var buildingIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID do pr\xE9dio deve ser um UUID v\xE1lido." }).openapi({
     param: { name: "id", in: "path" }
   })
 });
-var propertyQuerySchema = z.object({
+var buildingQuerySchema = z.object({
   page: z.coerce.number().optional().default(1),
   limit: z.coerce.number().optional().default(10),
   query: z.string().optional().openapi({
-    description: "Busca por nome, cidade ou CAR",
-    example: "Fazenda"
+    description: "Busca por nome ou descri\xE7\xE3o do pr\xE9dio",
+    example: "Bloco"
   }),
-  status: z.nativeEnum(PropertyStatus).optional().openapi({
-    description: "Filtra pelo status da propriedade",
-    example: PropertyStatus.Active
+  centerId: z.string().uuid().optional().openapi({
+    description: "Filtra os pr\xE9dios por um centro espec\xEDfico"
+  }),
+  status: z.nativeEnum(SystemStatus).optional().openapi({
+    description: "Filtra pelo status do pr\xE9dio",
+    example: SystemStatus.Active
   })
 });
 
-// src/modules/field/field.enums.ts
-var FieldStatus = {
-  Ready: "READY",
-  Processing: "PROCESSING",
-  Waiting: "WAITING"
-};
-
-// src/modules/field/field.schemas.ts
-var coordinateSchema = z.object({
-  x: z.number(),
-  y: z.number()
-});
-var createFieldSchema = registry.register(
-  "CreateFieldRequest",
+// src/modules/centers/center.schemas.ts
+var createCenterSchema = registry.register(
+  "CreateCenterRequest",
   z.object({
-    name: z.string().min(2).max(120).trim().openapi({
-      description: "Nome do talh\xE3o",
-      example: "Talh\xE3o da Sede"
+    name: z.string().min(2).max(150).trim().openapi({
+      description: "Nome do Centro Acad\xEAmico",
+      example: "Centro de Ci\xEAncias Tecnol\xF3gicas"
     }),
-    soilType: z.string().optional().openapi({
-      description: "Tipo de solo",
-      example: "Latossolo Vermelho"
+    acronym: z.string().min(2).max(10).trim().toUpperCase().openapi({
+      description: "Sigla do Centro",
+      example: "CCT"
     }),
-    coordinates: z.array(coordinateSchema).min(3).openapi({
-      description: "V\xE9rtices do pol\xEDgono desenhado"
-    }),
-    propertyId: z.string().uuid().openapi({
-      description: "ID da propriedade a qual este talh\xE3o pertence"
+    color: z.string().regex(
+      /^bg-[a-z]+-\d{3}$/,
+      "A cor deve seguir o padr\xE3o do Tailwind (ex: bg-blue-500)"
+    ).openapi({
+      description: "Classe utilit\xE1ria de cor para a interface",
+      example: "bg-blue-500"
     })
   })
 );
-var updateFieldSchema = registry.register(
-  "UpdateFieldRequest",
-  createFieldSchema.omit({ propertyId: true }).extend({
-    status: z.nativeEnum(FieldStatus).openapi({
-      description: "Status de processamento do talh\xE3o",
-      example: FieldStatus.Ready
+var updateCenterSchema = registry.register(
+  "UpdateCenterRequest",
+  createCenterSchema.extend({
+    status: z.nativeEnum(SystemStatus).openapi({
+      description: "Status de atividade do Centro",
+      example: SystemStatus.Active
     })
   }).partial().refine((data) => Object.keys(data).length > 0, {
     message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
   })
 );
-var fieldResponseSchema = registry.register(
-  "FieldResponse",
+var centerResponseSchema = registry.register(
+  "CenterResponse",
   z.object({
     id: z.string().uuid(),
     name: z.string(),
-    code: z.string(),
-    soilType: z.string().nullable(),
-    area: z.number().nullable(),
-    perimeter: z.number().nullable(),
-    coordinates: z.any().nullable(),
-    status: z.nativeEnum(FieldStatus),
-    propertyId: z.string().uuid(),
-    property: propertyResponseSchema.optional(),
+    acronym: z.string(),
+    color: z.string(),
+    status: z.nativeEnum(SystemStatus),
+    buildings: z.array(buildingResponseSchema).optional(),
     createdAt: z.date(),
     updatedAt: z.date()
   })
 );
-var fieldIdSchema = z.object({
-  id: z.string().uuid({ message: "O ID do talh\xE3o deve ser um UUID v\xE1lido." }).openapi({
+var centerIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID do centro deve ser um UUID v\xE1lido." }).openapi({
     param: { name: "id", in: "path" }
   })
 });
-var fieldQuerySchema = z.object({
+var centerQuerySchema = z.object({
   page: z.coerce.number().optional().default(1),
   limit: z.coerce.number().optional().default(10),
-  propertyId: z.string().uuid().optional().openapi({
-    description: "Filtra os talh\xF5es por uma propriedade espec\xEDfica"
-  }),
   query: z.string().optional().openapi({
-    description: "Busca por nome ou c\xF3digo do talh\xE3o",
-    example: "TAL-001"
+    description: "Busca por nome ou sigla do Centro",
+    example: "Tecnol\xF3gicas"
   }),
-  status: z.nativeEnum(FieldStatus).optional().openapi({
-    description: "Filtra pelo status do talh\xE3o",
-    example: FieldStatus.Ready
+  status: z.nativeEnum(SystemStatus).optional().openapi({
+    description: "Filtra pelo status do Centro",
+    example: SystemStatus.Active
+  }),
+  includeBuildings: z.coerce.boolean().optional().default(false).openapi({
+    description: "Se verdadeiro, inclui os pr\xE9dios vinculados ao centro na resposta"
   })
 });
 
@@ -349,31 +336,29 @@ function formatMinutesToReadable(minutes) {
 }
 export {
   AuthEnums,
-  FieldStatus,
   OpenApiGeneratorV3,
-  PropertyStatus,
-  coordinateSchema,
-  createFieldSchema,
+  SystemStatus,
+  buildingIdSchema,
+  buildingQuerySchema,
+  buildingResponseSchema,
+  centerIdSchema,
+  centerQuerySchema,
+  centerResponseSchema,
+  createBuildingSchema,
+  createCenterSchema,
   createPaginatedResponseSchema,
-  createPropertySchema,
   createUserSchema,
-  fieldIdSchema,
-  fieldQuerySchema,
-  fieldResponseSchema,
   formatMinutesToReadable,
   loginSchema,
   minutesToDecimalHours,
   paginationMetaSchema,
   paginationSchema,
-  propertyIdSchema,
-  propertyQuerySchema,
-  propertyResponseSchema,
   refreshTokenSchema,
   registry,
   rfc7807ErrorSchema,
   timeStringToMinutes,
-  updateFieldSchema,
-  updatePropertySchema,
+  updateBuildingSchema,
+  updateCenterSchema,
   updateUserSchema,
   userIdSchema,
   userResponseSchema,

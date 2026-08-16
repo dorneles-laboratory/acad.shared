@@ -1,7 +1,7 @@
 export * from './modules/auth';
 export * from './modules/users';
-export * from './modules/property';
-export * from './modules/field';
+export * from './modules/buildings';
+export * from './modules/centers';
 
 export * from './common/';
 
