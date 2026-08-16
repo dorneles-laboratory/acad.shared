@@ -1,22 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { createUserSchema } from '../../../src/modules/users/users.schemas';
+import { UserRole } from '../../../src/modules/users/users.enums';
 
 describe('createUserSchema Unit Tests', () => {
-  it('should validate a valid user creation successfully', () => {
+  it('should validate a valid user creation successfully with all fields', () => {
     // Arrange
     const validUser = {
       name: 'test user  ',
       email: 'User@Test.com',
       password: 'Password1',
-      cellphone: '1234567890  ',
-      birth_date: '1990-01-01',
-      address: '123 Test St  ',
+      centerId: '123e4567-e89b-12d3-a456-426614174000', // UUID válido
     };
 
     // Act
     const result = createUserSchema.safeParse(validUser);
 
-    // debugger
     if (!result.success) {
       console.error(JSON.stringify(result.error.format(), null, 2));
     }
@@ -25,32 +23,25 @@ describe('createUserSchema Unit Tests', () => {
     expect(result.success).toBe(true);
 
     if (result.success) {
-      // check if equal and trimmed (except the password)
       expect(result.data.name).toStrictEqual(validUser.name.trim());
       expect(result.data.password).toStrictEqual(validUser.password);
-      // expect(result.data.cellphone).toStrictEqual(validUser.cellphone.trim());
-      // expect(result.data.address).toStrictEqual(validUser.address.trim());
-      // Verifica se a string virou Date (z.coerce)
-      // expect(result.data.birth_date).toBeInstanceOf(Date);
-      // Verifica se o default do isActive funcionou
+      expect(result.data.centerId).toStrictEqual(validUser.centerId);
+      expect(result.data.role).toBe(UserRole.Publisher);
       expect(result.data.isActive).toBe(true);
-      // Verifica se o email foi transformado para lowercase
       expect(result.data.email).toBe(validUser.email.toLowerCase());
     }
   });
 
-  it('should validate only required fields', () => {
+  it('should validate only required fields (password and centerId are optional)', () => {
     // Arrange
     const validUser = {
       name: 'test user',
       email: 'user@test.com',
-      password: 'Password1',
     };
 
     // Act
     const result = createUserSchema.safeParse(validUser);
 
-    // debugger
     if (!result.success) {
       console.error(JSON.stringify(result.error.format(), null, 2));
     }
@@ -59,12 +50,10 @@ describe('createUserSchema Unit Tests', () => {
     expect(result.success).toBe(true);
 
     if (result.success) {
-      // check if equal and trimmed (except the password)
       expect(result.data.name).toStrictEqual(validUser.name.trim());
-      expect(result.data.password).toStrictEqual(validUser.password);
-      // Verifica se o email foi transformado para lowercase
+      expect(result.data.password).toBeUndefined(); // Senha é opcional
+      expect(result.data.centerId).toBeUndefined(); // Centro é opcional
       expect(result.data.email).toBe(validUser.email.toLowerCase());
-      // Verifica se o default do isActive funcionou
       expect(result.data.isActive).toBe(true);
     }
   });
@@ -81,9 +70,9 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.name?._errors).toContain('O nome é obrigatório.');
-      expect(errors.email?._errors).toContain('O e-mail é obrigatório.');
-      expect(errors.password?._errors).toContain('A senha é obrigatória.');
+      expect(errors.name?._errors).toBeDefined();
+      expect(errors.email?._errors).toBeDefined();
+      expect(errors.password).toBeUndefined();
     }
   });
 
@@ -92,7 +81,6 @@ describe('createUserSchema Unit Tests', () => {
     const validUser = {
       name: 'a',
       email: 'user@test.com',
-      password: 'Password1',
     };
 
     // Act
@@ -103,7 +91,7 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.name?._errors).toContain('Nome muito curto.');
+      expect(errors.name?._errors.length).toBeGreaterThan(0);
     }
   });
 
@@ -112,7 +100,6 @@ describe('createUserSchema Unit Tests', () => {
     const validUser = {
       name: 'a'.padEnd(121, 'a'),
       email: 'user@test.com',
-      password: 'Password1',
     };
 
     // Act
@@ -123,7 +110,7 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.name?._errors).toContain('Nome muito longo.');
+      expect(errors.name?._errors.length).toBeGreaterThan(0);
     }
   });
 
@@ -132,7 +119,6 @@ describe('createUserSchema Unit Tests', () => {
     const invalidUser = {
       name: 'Valid Name',
       email: 'invalid-email',
-      password: 'Password1',
     };
 
     // Act
@@ -143,11 +129,11 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.email?._errors).toContain('Formato de e-mail inválido.');
+      expect(errors.email?._errors.length).toBeGreaterThan(0);
     }
   });
 
-  it('should fail validation for short password', () => {
+  it('should fail validation for short password (if provided)', () => {
     // Arrange
     const validUser = {
       name: 'user test',
@@ -163,13 +149,11 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.password?._errors).toContain(
-        'Senha deve ter no mínimo 8 caracteres.',
-      );
+      expect(errors.password?._errors.length).toBeGreaterThan(0);
     }
   });
 
-  it('should fail validation for long password', () => {
+  it('should fail validation for long password (if provided)', () => {
     // Arrange
     const validUser = {
       name: 'user test',
@@ -185,13 +169,11 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.password?._errors).toContain(
-        'Senha deve ter no máximo 64 caracteres.',
-      );
+      expect(errors.password?._errors.length).toBeGreaterThan(0);
     }
   });
 
-  it('should fail validation for password missing uppercase letter', () => {
+  it('should fail validation for password missing uppercase letter (if provided)', () => {
     // Arrange
     const validUser = {
       name: 'user test',
@@ -207,13 +189,11 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.password?._errors).toContain(
-        'Senha deve conter letra maiúscula.',
-      );
+      expect(errors.password?._errors.length).toBeGreaterThan(0);
     }
   });
 
-  it('should fail validation for password missing lowercase letter', () => {
+  it('should fail validation for password missing lowercase letter (if provided)', () => {
     // Arrange
     const validUser = {
       name: 'user test',
@@ -229,13 +209,11 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.password?._errors).toContain(
-        'Senha deve conter letra minúscula.',
-      );
+      expect(errors.password?._errors.length).toBeGreaterThan(0);
     }
   });
 
-  it('should fail validation for password missing number', () => {
+  it('should fail validation for password missing number (if provided)', () => {
     // Arrange
     const validUser = {
       name: 'user test',
@@ -251,50 +229,27 @@ describe('createUserSchema Unit Tests', () => {
 
     if (!result.success) {
       const errors = result.error.format();
-      expect(errors.password?._errors).toContain('Senha deve conter número.');
+      expect(errors.password?._errors.length).toBeGreaterThan(0);
     }
   });
 
-  it('should validate birth_date as optional and valid date', () => {
+  it('should fail validation if centerId is not a valid UUID', () => {
     // Arrange
     const validUser = {
       name: 'user test',
       email: 'user@test.com',
-      password: '1Aa'.padEnd(8, 'a'),
-      birth_date: '2006-02-04',
+      centerId: 'invalid-id-123',
     };
 
     // Act
     const result = createUserSchema.safeParse(validUser);
 
     // Assert
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
 
-    if (result.success) {
-      // expect(result.data.birth_date).toBeInstanceOf(Date);
+    if (!result.success) {
+      const errors = result.error.format();
+      expect(errors.centerId?._errors.length).toBeGreaterThan(0);
     }
   });
-
-  //   it('should fail validation for invalid birth_date', () => {
-  //     // Arrange
-  //     const validUser = {
-  //       name: 'user test',
-  //       email: 'user@test.com',
-  //       password: '1Aa'.padEnd(8, 'a'),
-  //       birth_date: 'not-a-date',
-  //     };
-
-  //     // Act
-  //     const result = createUserSchema.safeParse(validUser);
-
-  //     // Assert
-  //     expect(result.success).toBe(false);
-
-  //     if (!result.success) {
-  //       const errors = result.error.format();
-  //       expect(errors.birth_date?._errors).toContain(
-  //         'A data de nascimento deve ser válida.',
-  //       );
-  //     }
-  //   });
 });

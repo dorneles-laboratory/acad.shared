@@ -47,84 +47,12 @@ var AuthEnums = {
   }
 };
 
-// src/modules/users/users.schemas.ts
-var createUserSchema = registry.register(
-  "CreateUserRequest",
-  z.object({
-    name: z.string({
-      error: ({ input }) => input === void 0 ? "O nome \xE9 obrigat\xF3rio." : "O nome deve ser um texto."
-    }).min(2, { message: "Nome muito curto." }).max(120, { message: "Nome muito longo." }).trim().openapi({
-      description: "Nome completo do usu\xE1rio",
-      example: "Usu\xE1rio de Teste"
-    }),
-    email: z.email({
-      error: ({ input }) => input === void 0 ? "O e-mail \xE9 obrigat\xF3rio." : "Formato de e-mail inv\xE1lido."
-    }).transform((v) => v.toLowerCase()).openapi({
-      description: "E-mail exclusivo do usu\xE1rio para login",
-      example: "test@example.com"
-    }),
-    password: z.string({
-      error: ({ input }) => input === void 0 ? "A senha \xE9 obrigat\xF3ria." : "A senha deve ser um texto."
-    }).min(8, { message: "Senha deve ter no m\xEDnimo 8 caracteres." }).max(64, { message: "Senha deve ter no m\xE1ximo 64 caracteres." }).regex(/[A-Z]/, { message: "Senha deve conter letra mai\xFAscula." }).regex(/[a-z]/, { message: "Senha deve conter letra min\xFAscula." }).regex(/[0-9]/, { message: "Senha deve conter n\xFAmero." }).openapi({
-      description: "Senha do usu\xE1rio com crit\xE9rios de seguran\xE7a",
-      example: "Senha@123"
-    }),
-    // cellphone: z.string().trim().optional().openapi({
-    //   description: 'Número de celular do usuário',
-    //   example: '(55) 99999-9999',
-    // }),
-    // birth_date: z.coerce
-    //   .date({
-    //     message: 'A data de nascimento deve ser válida.',
-    //   })
-    //   .optional()
-    //   .openapi({
-    //     description: 'Data de nascimento do usuário (YYYY-MM-DD)',
-    //     example: '1990-01-01',
-    //   }),
-    // address: z.string().trim().optional().openapi({
-    //   description: 'Endereço do usuário',
-    //   example: 'Rua Exemplo, 123 - Cidade/UF',
-    // }),
-    isActive: z.boolean().default(true).optional()
-  })
-);
-var updateUserSchema = createUserSchema.partial().omit({ password: true }).extend({
-  password: z.string().min(8, { message: "Senha deve ter no m\xEDnimo 8 caracteres." }).max(64, { message: "Senha deve ter no m\xE1ximo 64 caracteres." }).regex(/[A-Z]/, { message: "Senha deve conter letra mai\xFAscula." }).regex(/[a-z]/, { message: "Senha deve conter letra min\xFAscula." }).regex(/[0-9]/, { message: "Senha deve conter n\xFAmero." }).optional().openapi({
-    description: "Nova senha do usu\xE1rio (opcional, com crit\xE9rios de seguran\xE7a)",
-    example: "NovaSenha@123"
-  }),
-  isActive: z.boolean().optional()
-}).refine((data) => Object.keys(data).length > 0, {
-  message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
-});
-var userResponseSchema = registry.register(
-  "UserResponse",
-  z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    email: z.string().email(),
-    // cellphone: z.string().nullable(),
-    // birth_date: z.coerce.date().nullable(),
-    // address: z.string().nullable(),
-    isActive: z.boolean(),
-    created_at: z.coerce.date(),
-    updated_at: z.coerce.date()
-    // deletedAt: z.coerce.date().nullable(),
-  })
-);
-var userIdSchema = z.object({
-  id: z.uuid({
-    error: ({ input }) => input === void 0 ? "O Id \xE9 obrigat\xF3rio." : "O ID do usu\xE1rio deve ser um UUID v\xE1lido."
-  }).openapi({
-    param: {
-      name: "id",
-      in: "path"
-    },
-    description: "UUID Identificador exclusivo do usu\xE1rio",
-    example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
-  })
-});
+// src/modules/users/users.enums.ts
+var UserRole = {
+  SuperAdmin: "SUPER_ADMIN",
+  CenterAdmin: "CENTER_ADMIN",
+  Publisher: "PUBLISHER"
+};
 
 // src/common/common.enums.ts
 var SystemStatus = {
@@ -260,6 +188,97 @@ var centerQuerySchema = z.object({
   })
 });
 
+// src/modules/users/users.schemas.ts
+var createUserSchema = registry.register(
+  "CreateUserRequest",
+  z.object({
+    name: z.string({
+      error: ({ input }) => input === void 0 ? "O nome \xE9 obrigat\xF3rio." : "O nome deve ser um texto."
+    }).min(2, { message: "Nome muito curto." }).max(120, { message: "Nome muito longo." }).trim().openapi({
+      description: "Nome completo do usu\xE1rio",
+      example: "Usu\xE1rio de Teste"
+    }),
+    email: z.email({
+      error: ({ input }) => input === void 0 ? "O e-mail \xE9 obrigat\xF3rio." : "Formato de e-mail inv\xE1lido."
+    }).transform((v) => v.toLowerCase()).openapi({
+      description: "E-mail exclusivo do usu\xE1rio para login",
+      example: "test@example.com"
+    }),
+    password: z.string({
+      error: ({ input }) => input === void 0 ? "A senha \xE9 obrigat\xF3ria." : "A senha deve ser um texto."
+    }).min(8, { message: "Senha deve ter no m\xEDnimo 8 caracteres." }).max(64, { message: "Senha deve ter no m\xE1ximo 64 caracteres." }).regex(/[A-Z]/, { message: "Senha deve conter letra mai\xFAscula." }).regex(/[a-z]/, { message: "Senha deve conter letra min\xFAscula." }).regex(/[0-9]/, { message: "Senha deve conter n\xFAmero." }).optional().openapi({
+      description: "Senha do usu\xE1rio com crit\xE9rios de seguran\xE7a",
+      example: "Senha@123"
+    }),
+    role: z.nativeEnum(UserRole).default(UserRole.Publisher).openapi({
+      description: "Fun\xE7\xE3o do usu\xE1rio no sistema",
+      example: UserRole.Publisher
+    }),
+    centerId: z.string().uuid().nullish().openapi({
+      description: "UUID do Centro Acad\xEAmico associado ao usu\xE1rio",
+      example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
+    }),
+    isActive: z.boolean().default(true).optional()
+  })
+);
+var updateUserSchema = registry.register(
+  "UpdateUserRequest",
+  z.object({
+    name: z.string({
+      error: ({ input }) => "O nome deve ser um texto."
+    }).min(2, { message: "Nome muito curto." }).max(120, { message: "Nome muito longo." }).trim().optional().openapi({
+      description: "Nome completo do usu\xE1rio",
+      example: "Usu\xE1rio de Teste Atualizado"
+    }),
+    email: z.email({ message: "Formato de e-mail inv\xE1lido." }).transform((v) => v.toLowerCase()).optional().openapi({
+      description: "E-mail exclusivo do usu\xE1rio para login",
+      example: "test_updated@example.com"
+    }),
+    password: z.string().min(8, { message: "Senha deve ter no m\xEDnimo 8 caracteres." }).max(64, { message: "Senha deve ter no m\xE1ximo 64 caracteres." }).regex(/[A-Z]/, { message: "Senha deve conter letra mai\xFAscula." }).regex(/[a-z]/, { message: "Senha deve conter letra min\xFAscula." }).regex(/[0-9]/, { message: "Senha deve conter n\xFAmero." }).optional().openapi({
+      description: "Nova senha do usu\xE1rio (opcional, com crit\xE9rios de seguran\xE7a)",
+      example: "NovaSenha@123"
+    }),
+    role: z.nativeEnum(UserRole).optional().openapi({
+      description: "Fun\xE7\xE3o do usu\xE1rio no sistema",
+      example: UserRole.CenterAdmin
+    }),
+    centerId: z.string().uuid().nullish().openapi({
+      description: "UUID do Centro Acad\xEAmico associado ao usu\xE1rio",
+      example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
+    }),
+    isActive: z.boolean().optional()
+  }).refine((data) => Object.keys(data).length > 0, {
+    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
+  })
+);
+var userResponseSchema = registry.register(
+  "UserResponse",
+  z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    email: z.string().email(),
+    role: z.nativeEnum(UserRole),
+    isActive: z.boolean(),
+    centerId: z.string().uuid().nullable(),
+    center: centerResponseSchema.optional(),
+    created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
+    temporaryPassword: z.string().optional()
+  })
+);
+var userIdSchema = z.object({
+  id: z.uuid({
+    error: ({ input }) => input === void 0 ? "O Id \xE9 obrigat\xF3rio." : "O ID do usu\xE1rio deve ser um UUID v\xE1lido."
+  }).openapi({
+    param: {
+      name: "id",
+      in: "path"
+    },
+    description: "UUID Identificador exclusivo do usu\xE1rio",
+    example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
+  })
+});
+
 // src/common/common.schemas.ts
 var rfc7807ErrorSchema = registry.register(
   "ProblemDetails",
@@ -338,6 +357,7 @@ export {
   AuthEnums,
   OpenApiGeneratorV3,
   SystemStatus,
+  UserRole,
   buildingIdSchema,
   buildingQuerySchema,
   buildingResponseSchema,

@@ -33,22 +33,65 @@ type LoginAuthDTO = z.infer<typeof loginSchema>;
 declare const createUserSchema: z.ZodObject<{
     name: z.ZodString;
     email: z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>;
-    password: z.ZodString;
+    password: z.ZodOptional<z.ZodString>;
+    role: z.ZodDefault<z.ZodEnum<{
+        readonly SuperAdmin: "SUPER_ADMIN";
+        readonly CenterAdmin: "CENTER_ADMIN";
+        readonly Publisher: "PUBLISHER";
+    }>>;
+    centerId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     isActive: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
 }, z.core.$strip>;
 declare const updateUserSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>>;
     password: z.ZodOptional<z.ZodString>;
+    role: z.ZodOptional<z.ZodEnum<{
+        readonly SuperAdmin: "SUPER_ADMIN";
+        readonly CenterAdmin: "CENTER_ADMIN";
+        readonly Publisher: "PUBLISHER";
+    }>>;
+    centerId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     isActive: z.ZodOptional<z.ZodBoolean>;
 }, z.core.$strip>;
 declare const userResponseSchema: z.ZodObject<{
     id: z.ZodString;
     name: z.ZodString;
     email: z.ZodString;
+    role: z.ZodEnum<{
+        readonly SuperAdmin: "SUPER_ADMIN";
+        readonly CenterAdmin: "CENTER_ADMIN";
+        readonly Publisher: "PUBLISHER";
+    }>;
     isActive: z.ZodBoolean;
+    centerId: z.ZodNullable<z.ZodString>;
+    center: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        acronym: z.ZodString;
+        color: z.ZodString;
+        status: z.ZodEnum<{
+            readonly Active: "ACTIVE";
+            readonly Inactive: "INACTIVE";
+        }>;
+        buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            name: z.ZodString;
+            description: z.ZodNullable<z.ZodString>;
+            status: z.ZodEnum<{
+                readonly Active: "ACTIVE";
+                readonly Inactive: "INACTIVE";
+            }>;
+            centerId: z.ZodString;
+            createdAt: z.ZodDate;
+            updatedAt: z.ZodDate;
+        }, z.core.$strip>>>;
+        createdAt: z.ZodDate;
+        updatedAt: z.ZodDate;
+    }, z.core.$strip>>;
     created_at: z.ZodCoercedDate<unknown>;
     updated_at: z.ZodCoercedDate<unknown>;
+    temporaryPassword: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 declare const userIdSchema: z.ZodObject<{
     id: z.ZodUUID;
@@ -95,6 +138,13 @@ type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 type UserIdDTO = z.infer<typeof userIdSchema>;
 type UserResponseDTO = z.infer<typeof userResponseSchema>;
 type PaginatedUsersDTO = PaginatedResultDTO<UserResponseDTO>;
+
+declare const UserRole: {
+    readonly SuperAdmin: "SUPER_ADMIN";
+    readonly CenterAdmin: "CENTER_ADMIN";
+    readonly Publisher: "PUBLISHER";
+};
+type EnumUserRole = (typeof UserRole)[keyof typeof UserRole];
 
 declare const createBuildingSchema: z.ZodObject<{
     name: z.ZodString;
@@ -221,4 +271,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type CreateBuildingDTO, type CreateCenterDTO, type CreateUserDTO, type EnumLoginStatus, type EnumSystemStatus, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, createBuildingSchema, createCenterSchema, createPaginatedResponseSchema, createUserSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type CreateBuildingDTO, type CreateCenterDTO, type CreateUserDTO, type EnumLoginStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, createBuildingSchema, createCenterSchema, createPaginatedResponseSchema, createUserSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateUserSchema, userIdSchema, userResponseSchema };
