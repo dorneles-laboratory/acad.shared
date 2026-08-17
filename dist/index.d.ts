@@ -324,11 +324,6 @@ type ScreenIdDTO = z.infer<typeof screenIdSchema>;
 type ScreenQueryDTO = z.infer<typeof screenQuerySchema>;
 type PaginatedScreensDTO = PaginatedResultDTO<ScreenResponseDTO>;
 
-declare const contentTargetingSchema: z.ZodObject<{
-    centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
-    buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
-    screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
-}, z.core.$strip>;
 declare const createContentSchema: z.ZodObject<{
     title: z.ZodString;
     type: z.ZodEnum<{
@@ -350,11 +345,6 @@ declare const createContentSchema: z.ZodObject<{
     contentUrl: z.ZodOptional<z.ZodString>;
     mediaUrl: z.ZodOptional<z.ZodString>;
     textBody: z.ZodOptional<z.ZodString>;
-    targeting: z.ZodOptional<z.ZodObject<{
-        centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
-        buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
-        screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
-    }, z.core.$strip>>;
 }, z.core.$strip>;
 declare const updateContentSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -364,24 +354,19 @@ declare const updateContentSchema: z.ZodObject<{
         readonly Notice: "NOTICE";
         readonly WebUrl: "WEB_URL";
     }>>;
+    status: z.ZodOptional<z.ZodOptional<z.ZodEnum<{
+        readonly Draft: "DRAFT";
+        readonly Scheduled: "SCHEDULED";
+        readonly Active: "ACTIVE";
+        readonly Expired: "EXPIRED";
+        readonly Archived: "ARCHIVED";
+    }>>>;
     startDate: z.ZodOptional<z.ZodOptional<z.ZodCoercedDate<unknown>>>;
     endDate: z.ZodOptional<z.ZodOptional<z.ZodCoercedDate<unknown>>>;
     author: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     contentUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     mediaUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     textBody: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    targeting: z.ZodOptional<z.ZodOptional<z.ZodObject<{
-        centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
-        buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
-        screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
-    }, z.core.$strip>>>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Draft: "DRAFT";
-        readonly Scheduled: "SCHEDULED";
-        readonly Active: "ACTIVE";
-        readonly Expired: "EXPIRED";
-        readonly Archived: "ARCHIVED";
-    }>>;
 }, z.core.$strip>;
 declare const contentResponseSchema: z.ZodObject<{
     id: z.ZodString;
@@ -405,11 +390,6 @@ declare const contentResponseSchema: z.ZodObject<{
     contentUrl: z.ZodNullable<z.ZodString>;
     mediaUrl: z.ZodNullable<z.ZodString>;
     textBody: z.ZodNullable<z.ZodString>;
-    targeting: z.ZodNullable<z.ZodObject<{
-        centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
-        buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
-        screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
-    }, z.core.$strip>>;
     ownerId: z.ZodString;
     owner: z.ZodOptional<z.ZodObject<{
         id: z.ZodString;
@@ -504,6 +484,109 @@ declare const uploadResponseSchema: z.ZodObject<{
 
 type UploadResponseDTO = z.infer<typeof uploadResponseSchema>;
 
+declare const createPlaylistItemSchema: z.ZodObject<{
+    buildingId: z.ZodString;
+    contentId: z.ZodString;
+    duration: z.ZodDefault<z.ZodNumber>;
+    order: z.ZodDefault<z.ZodNumber>;
+}, z.core.$strip>;
+declare const updatePlaylistItemSchema: z.ZodObject<{
+    duration: z.ZodOptional<z.ZodNumber>;
+    order: z.ZodOptional<z.ZodNumber>;
+}, z.core.$strip>;
+declare const reorderPlaylistSchema: z.ZodObject<{
+    buildingId: z.ZodString;
+    items: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        order: z.ZodNumber;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
+declare const playlistItemResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    buildingId: z.ZodString;
+    contentId: z.ZodString;
+    duration: z.ZodNumber;
+    order: z.ZodNumber;
+    content: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        title: z.ZodString;
+        type: z.ZodEnum<{
+            readonly Image: "IMAGE";
+            readonly Video: "VIDEO";
+            readonly Notice: "NOTICE";
+            readonly WebUrl: "WEB_URL";
+        }>;
+        status: z.ZodEnum<{
+            readonly Draft: "DRAFT";
+            readonly Scheduled: "SCHEDULED";
+            readonly Active: "ACTIVE";
+            readonly Expired: "EXPIRED";
+            readonly Archived: "ARCHIVED";
+        }>;
+        startDate: z.ZodNullable<z.ZodDate>;
+        endDate: z.ZodNullable<z.ZodDate>;
+        author: z.ZodNullable<z.ZodString>;
+        contentUrl: z.ZodNullable<z.ZodString>;
+        mediaUrl: z.ZodNullable<z.ZodString>;
+        textBody: z.ZodNullable<z.ZodString>;
+        ownerId: z.ZodString;
+        owner: z.ZodOptional<z.ZodObject<{
+            id: z.ZodString;
+            name: z.ZodString;
+            email: z.ZodString;
+            role: z.ZodEnum<{
+                readonly SuperAdmin: "SUPER_ADMIN";
+                readonly CenterAdmin: "CENTER_ADMIN";
+                readonly Publisher: "PUBLISHER";
+            }>;
+            isActive: z.ZodBoolean;
+            centerId: z.ZodNullable<z.ZodString>;
+            center: z.ZodOptional<z.ZodObject<{
+                id: z.ZodString;
+                name: z.ZodString;
+                acronym: z.ZodString;
+                color: z.ZodString;
+                status: z.ZodEnum<{
+                    readonly Active: "ACTIVE";
+                    readonly Inactive: "INACTIVE";
+                }>;
+                buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                    id: z.ZodString;
+                    name: z.ZodString;
+                    description: z.ZodNullable<z.ZodString>;
+                    status: z.ZodEnum<{
+                        readonly Active: "ACTIVE";
+                        readonly Inactive: "INACTIVE";
+                    }>;
+                    centerId: z.ZodString;
+                    createdAt: z.ZodDate;
+                    updatedAt: z.ZodDate;
+                }, z.core.$strip>>>;
+                createdAt: z.ZodDate;
+                updatedAt: z.ZodDate;
+            }, z.core.$strip>>;
+            created_at: z.ZodCoercedDate<unknown>;
+            updated_at: z.ZodCoercedDate<unknown>;
+            temporaryPassword: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>;
+        createdAt: z.ZodDate;
+        updatedAt: z.ZodDate;
+    }, z.core.$strip>>;
+    createdAt: z.ZodDate;
+    updatedAt: z.ZodDate;
+}, z.core.$strip>;
+declare const playlistItemIdSchema: z.ZodObject<{
+    id: z.ZodString;
+}, z.core.$strip>;
+declare const playlistBuildingQuerySchema: z.ZodObject<{
+    buildingId: z.ZodString;
+}, z.core.$strip>;
+
+type CreatePlaylistItemDTO = z.infer<typeof createPlaylistItemSchema>;
+type UpdatePlaylistItemDTO = z.infer<typeof updatePlaylistItemSchema>;
+type PlaylistItemResponseDTO = z.infer<typeof playlistItemResponseSchema>;
+type ReorderPlaylistDTO = z.infer<typeof reorderPlaylistSchema>;
+
 declare const SystemStatus: {
     readonly Active: "ACTIVE";
     readonly Inactive: "INACTIVE";
@@ -523,4 +606,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreateScreenDTO, type CreateUserDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, contentTargetingSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createScreenSchema, createUserSchema, formatMinutesToReadable, ipv4Schema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, screenIdSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreatePlaylistItemDTO, type CreateScreenDTO, type CreateUserDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type PlaylistItemResponseDTO, type ProblemDetailsDTO, type ReorderPlaylistDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdatePlaylistItemDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createPlaylistItemSchema, createScreenSchema, createUserSchema, formatMinutesToReadable, ipv4Schema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, playlistBuildingQuerySchema, playlistItemIdSchema, playlistItemResponseSchema, refreshTokenSchema, registry, reorderPlaylistSchema, rfc7807ErrorSchema, screenIdSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updatePlaylistItemSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
