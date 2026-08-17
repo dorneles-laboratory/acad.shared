@@ -2,12 +2,6 @@ import { z, registry } from '../../lib/registry';
 import { userResponseSchema } from '../users';
 import { ContentType, ContentStatus } from './content.enums';
 
-export const contentTargetingSchema = z.object({
-  centers: z.array(z.string().uuid()).optional(),
-  buildings: z.array(z.string().uuid()).optional(),
-  screens: z.array(z.string().uuid()).optional(),
-});
-
 const baseContentSchema = z.object({
   title: z.string().min(2).max(120).trim().openapi({
     description: 'Título do conteúdo',
@@ -42,11 +36,6 @@ const baseContentSchema = z.object({
   textBody: z.string().optional().openapi({
     description: 'Corpo de texto caso seja um aviso escrito',
   }),
-  targeting: contentTargetingSchema.optional().openapi({
-    description:
-      'Configuração de segmentação (Centros, Prédios ou Telas específicas)',
-    example: { centers: ['uuid-do-centro'], screens: ['uuid-da-tela'] },
-  }),
 });
 
 export const createContentSchema = registry.register(
@@ -68,12 +57,6 @@ export const createContentSchema = registry.register(
 export const updateContentSchema = registry.register(
   'UpdateContentRequest',
   baseContentSchema
-    .extend({
-      status: z.nativeEnum(ContentStatus).openapi({
-        description: 'Status atual do conteúdo',
-        example: ContentStatus.Active,
-      }),
-    })
     .partial()
     .refine((data: Record<string, unknown>) => Object.keys(data).length > 0, {
       message: 'Pelo menos um campo deve ser fornecido para atualização.',
@@ -105,7 +88,6 @@ export const contentResponseSchema = registry.register(
     contentUrl: z.string().nullable(),
     mediaUrl: z.string().nullable(),
     textBody: z.string().nullable(),
-    targeting: contentTargetingSchema.nullable(),
     ownerId: z.string().uuid(),
     owner: userResponseSchema.optional(),
     createdAt: z.date(),

@@ -432,11 +432,6 @@ var ContentStatus = {
 };
 
 // src/modules/content/content.schemas.ts
-var contentTargetingSchema = z.object({
-  centers: z.array(z.string().uuid()).optional(),
-  buildings: z.array(z.string().uuid()).optional(),
-  screens: z.array(z.string().uuid()).optional()
-});
 var baseContentSchema = z.object({
   title: z.string().min(2).max(120).trim().openapi({
     description: "T\xEDtulo do conte\xFAdo",
@@ -470,10 +465,6 @@ var baseContentSchema = z.object({
   }),
   textBody: z.string().optional().openapi({
     description: "Corpo de texto caso seja um aviso escrito"
-  }),
-  targeting: contentTargetingSchema.optional().openapi({
-    description: "Configura\xE7\xE3o de segmenta\xE7\xE3o (Centros, Pr\xE9dios ou Telas espec\xEDficas)",
-    example: { centers: ["uuid-do-centro"], screens: ["uuid-da-tela"] }
   })
 });
 var createContentSchema = registry.register(
@@ -493,12 +484,7 @@ var createContentSchema = registry.register(
 );
 var updateContentSchema = registry.register(
   "UpdateContentRequest",
-  baseContentSchema.extend({
-    status: z.nativeEnum(ContentStatus).openapi({
-      description: "Status atual do conte\xFAdo",
-      example: ContentStatus.Active
-    })
-  }).partial().refine((data) => Object.keys(data).length > 0, {
+  baseContentSchema.partial().refine((data) => Object.keys(data).length > 0, {
     message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
   }).refine(
     (data) => {
@@ -526,7 +512,6 @@ var contentResponseSchema = registry.register(
     contentUrl: z.string().nullable(),
     mediaUrl: z.string().nullable(),
     textBody: z.string().nullable(),
-    targeting: contentTargetingSchema.nullable(),
     ownerId: z.string().uuid(),
     owner: userResponseSchema.optional(),
     createdAt: z.date(),
@@ -569,6 +554,67 @@ var uploadResponseSchema = registry.register(
 // src/modules/upload/upload.types.ts
 import "zod";
 
+// src/modules/playlist/playlist.schemas.ts
+var createPlaylistItemSchema = registry.register(
+  "CreatePlaylistItemRequest",
+  z.object({
+    buildingId: z.string().uuid(),
+    contentId: z.string().uuid(),
+    duration: z.number().int().min(1).default(10).openapi({
+      description: "Dura\xE7\xE3o de exibi\xE7\xE3o em segundos",
+      example: 10
+    }),
+    order: z.number().int().default(0).openapi({
+      description: "Ordem de exibi\xE7\xE3o na playlist",
+      example: 1
+    })
+  })
+);
+var updatePlaylistItemSchema = registry.register(
+  "UpdatePlaylistItemRequest",
+  z.object({
+    duration: z.number().int().min(1).optional(),
+    order: z.number().int().optional()
+  }).refine((data) => Object.keys(data).length > 0, {
+    message: "Pelo menos um campo (duration ou order) deve ser fornecido."
+  })
+);
+var reorderPlaylistSchema = registry.register(
+  "ReorderPlaylistRequest",
+  z.object({
+    buildingId: z.string().uuid(),
+    items: z.array(
+      z.object({
+        id: z.string().uuid(),
+        order: z.number().int()
+      })
+    )
+  })
+);
+var playlistItemResponseSchema = registry.register(
+  "PlaylistItemResponse",
+  z.object({
+    id: z.string().uuid(),
+    buildingId: z.string().uuid(),
+    contentId: z.string().uuid(),
+    duration: z.number().int(),
+    order: z.number().int(),
+    content: contentResponseSchema.optional(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+  })
+);
+var playlistItemIdSchema = z.object({
+  id: z.string().uuid({ message: "UUID inv\xE1lido." }).openapi({
+    param: { name: "id", in: "path" }
+  })
+});
+var playlistBuildingQuerySchema = z.object({
+  buildingId: z.string().uuid({ message: "UUID do pr\xE9dio inv\xE1lido." }).openapi({
+    param: { name: "buildingId", in: "path" }
+  })
+});
+
 // src/utils/date-time.ts
 function timeStringToMinutes(timeString) {
   const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]$/;
@@ -602,11 +648,11 @@ export {
   contentIdSchema,
   contentQuerySchema,
   contentResponseSchema,
-  contentTargetingSchema,
   createBuildingSchema,
   createCenterSchema,
   createContentSchema,
   createPaginatedResponseSchema,
+  createPlaylistItemSchema,
   createScreenSchema,
   createUserSchema,
   formatMinutesToReadable,
@@ -615,8 +661,12 @@ export {
   minutesToDecimalHours,
   paginationMetaSchema,
   paginationSchema,
+  playlistBuildingQuerySchema,
+  playlistItemIdSchema,
+  playlistItemResponseSchema,
   refreshTokenSchema,
   registry,
+  reorderPlaylistSchema,
   rfc7807ErrorSchema,
   screenIdSchema,
   screenQuerySchema,
@@ -625,6 +675,7 @@ export {
   updateBuildingSchema,
   updateCenterSchema,
   updateContentSchema,
+  updatePlaylistItemSchema,
   updateScreenSchema,
   updateUserSchema,
   uploadResponseSchema,
