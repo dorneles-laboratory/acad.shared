@@ -244,6 +244,7 @@ declare const centerQuerySchema: z.ZodObject<{
         readonly Inactive: "INACTIVE";
     }>>;
     includeBuildings: z.ZodDefault<z.ZodOptional<z.ZodCoercedBoolean<unknown>>>;
+    includeScreens: z.ZodDefault<z.ZodOptional<z.ZodCoercedBoolean<unknown>>>;
 }, z.core.$strip>;
 
 type CreateCenterDTO = z.infer<typeof createCenterSchema>;
@@ -323,6 +324,186 @@ type ScreenIdDTO = z.infer<typeof screenIdSchema>;
 type ScreenQueryDTO = z.infer<typeof screenQuerySchema>;
 type PaginatedScreensDTO = PaginatedResultDTO<ScreenResponseDTO>;
 
+declare const contentTargetingSchema: z.ZodObject<{
+    centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
+}, z.core.$strip>;
+declare const createContentSchema: z.ZodObject<{
+    title: z.ZodString;
+    type: z.ZodEnum<{
+        readonly Image: "IMAGE";
+        readonly Video: "VIDEO";
+        readonly Notice: "NOTICE";
+        readonly WebUrl: "WEB_URL";
+    }>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Draft: "DRAFT";
+        readonly Scheduled: "SCHEDULED";
+        readonly Active: "ACTIVE";
+        readonly Expired: "EXPIRED";
+        readonly Archived: "ARCHIVED";
+    }>>;
+    startDate: z.ZodOptional<z.ZodCoercedDate<unknown>>;
+    endDate: z.ZodOptional<z.ZodCoercedDate<unknown>>;
+    author: z.ZodOptional<z.ZodString>;
+    contentUrl: z.ZodOptional<z.ZodString>;
+    mediaUrl: z.ZodOptional<z.ZodString>;
+    textBody: z.ZodOptional<z.ZodString>;
+    targeting: z.ZodOptional<z.ZodObject<{
+        centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
+declare const updateContentSchema: z.ZodObject<{
+    title: z.ZodOptional<z.ZodString>;
+    type: z.ZodOptional<z.ZodEnum<{
+        readonly Image: "IMAGE";
+        readonly Video: "VIDEO";
+        readonly Notice: "NOTICE";
+        readonly WebUrl: "WEB_URL";
+    }>>;
+    startDate: z.ZodOptional<z.ZodOptional<z.ZodCoercedDate<unknown>>>;
+    endDate: z.ZodOptional<z.ZodOptional<z.ZodCoercedDate<unknown>>>;
+    author: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    contentUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    mediaUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    textBody: z.ZodOptional<z.ZodOptional<z.ZodString>>;
+    targeting: z.ZodOptional<z.ZodOptional<z.ZodObject<{
+        centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    }, z.core.$strip>>>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Draft: "DRAFT";
+        readonly Scheduled: "SCHEDULED";
+        readonly Active: "ACTIVE";
+        readonly Expired: "EXPIRED";
+        readonly Archived: "ARCHIVED";
+    }>>;
+}, z.core.$strip>;
+declare const contentResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    title: z.ZodString;
+    type: z.ZodEnum<{
+        readonly Image: "IMAGE";
+        readonly Video: "VIDEO";
+        readonly Notice: "NOTICE";
+        readonly WebUrl: "WEB_URL";
+    }>;
+    status: z.ZodEnum<{
+        readonly Draft: "DRAFT";
+        readonly Scheduled: "SCHEDULED";
+        readonly Active: "ACTIVE";
+        readonly Expired: "EXPIRED";
+        readonly Archived: "ARCHIVED";
+    }>;
+    startDate: z.ZodNullable<z.ZodDate>;
+    endDate: z.ZodNullable<z.ZodDate>;
+    author: z.ZodNullable<z.ZodString>;
+    contentUrl: z.ZodNullable<z.ZodString>;
+    mediaUrl: z.ZodNullable<z.ZodString>;
+    textBody: z.ZodNullable<z.ZodString>;
+    targeting: z.ZodNullable<z.ZodObject<{
+        centers: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        buildings: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        screens: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    }, z.core.$strip>>;
+    ownerId: z.ZodString;
+    owner: z.ZodOptional<z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        email: z.ZodString;
+        role: z.ZodEnum<{
+            readonly SuperAdmin: "SUPER_ADMIN";
+            readonly CenterAdmin: "CENTER_ADMIN";
+            readonly Publisher: "PUBLISHER";
+        }>;
+        isActive: z.ZodBoolean;
+        centerId: z.ZodNullable<z.ZodString>;
+        center: z.ZodOptional<z.ZodObject<{
+            id: z.ZodString;
+            name: z.ZodString;
+            acronym: z.ZodString;
+            color: z.ZodString;
+            status: z.ZodEnum<{
+                readonly Active: "ACTIVE";
+                readonly Inactive: "INACTIVE";
+            }>;
+            buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
+                id: z.ZodString;
+                name: z.ZodString;
+                description: z.ZodNullable<z.ZodString>;
+                status: z.ZodEnum<{
+                    readonly Active: "ACTIVE";
+                    readonly Inactive: "INACTIVE";
+                }>;
+                centerId: z.ZodString;
+                createdAt: z.ZodDate;
+                updatedAt: z.ZodDate;
+            }, z.core.$strip>>>;
+            createdAt: z.ZodDate;
+            updatedAt: z.ZodDate;
+        }, z.core.$strip>>;
+        created_at: z.ZodCoercedDate<unknown>;
+        updated_at: z.ZodCoercedDate<unknown>;
+        temporaryPassword: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>;
+    createdAt: z.ZodDate;
+    updatedAt: z.ZodDate;
+}, z.core.$strip>;
+declare const contentIdSchema: z.ZodObject<{
+    id: z.ZodString;
+}, z.core.$strip>;
+declare const contentQuerySchema: z.ZodObject<{
+    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
+    query: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Draft: "DRAFT";
+        readonly Scheduled: "SCHEDULED";
+        readonly Active: "ACTIVE";
+        readonly Expired: "EXPIRED";
+        readonly Archived: "ARCHIVED";
+    }>>;
+    type: z.ZodOptional<z.ZodEnum<{
+        readonly Image: "IMAGE";
+        readonly Video: "VIDEO";
+        readonly Notice: "NOTICE";
+        readonly WebUrl: "WEB_URL";
+    }>>;
+}, z.core.$strip>;
+
+type CreateContentDTO = z.infer<typeof createContentSchema>;
+type UpdateContentDTO = z.infer<typeof updateContentSchema>;
+type ContentResponseDTO = z.infer<typeof contentResponseSchema>;
+type ContentIdDTO = z.infer<typeof contentIdSchema>;
+type ContentQueryDTO = z.infer<typeof contentQuerySchema>;
+type PaginatedContentsDTO = PaginatedResultDTO<ContentResponseDTO>;
+
+declare const ContentType: {
+    readonly Image: "IMAGE";
+    readonly Video: "VIDEO";
+    readonly Notice: "NOTICE";
+    readonly WebUrl: "WEB_URL";
+};
+type EnumContentType = (typeof ContentType)[keyof typeof ContentType];
+declare const ContentStatus: {
+    readonly Draft: "DRAFT";
+    readonly Scheduled: "SCHEDULED";
+    readonly Active: "ACTIVE";
+    readonly Expired: "EXPIRED";
+    readonly Archived: "ARCHIVED";
+};
+type EnumContentStatus = (typeof ContentStatus)[keyof typeof ContentStatus];
+
+declare const uploadResponseSchema: z.ZodObject<{
+    url: z.ZodString;
+}, z.core.$strip>;
+
+type UploadResponseDTO = z.infer<typeof uploadResponseSchema>;
+
 declare const SystemStatus: {
     readonly Active: "ACTIVE";
     readonly Inactive: "INACTIVE";
@@ -342,4 +523,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type CreateBuildingDTO, type CreateCenterDTO, type CreateScreenDTO, type CreateUserDTO, type EnumLoginStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateScreenDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, createBuildingSchema, createCenterSchema, createPaginatedResponseSchema, createScreenSchema, createUserSchema, formatMinutesToReadable, ipv4Schema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, screenIdSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateScreenSchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreateScreenDTO, type CreateUserDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, contentTargetingSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createScreenSchema, createUserSchema, formatMinutesToReadable, ipv4Schema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, screenIdSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
