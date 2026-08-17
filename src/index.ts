@@ -3,6 +3,8 @@ export * from './modules/users';
 export * from './modules/buildings';
 export * from './modules/centers';
 export * from './modules/screens';
+export * from './modules/content';
+export * from './modules/upload';
 
 export * from './common/';
 

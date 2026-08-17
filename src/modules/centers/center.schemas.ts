@@ -16,12 +16,12 @@ export const createCenterSchema = registry.register(
     color: z
       .string()
       .regex(
-        /^bg-[a-z]+-\d{3}$/,
-        'A cor deve seguir o padrão do Tailwind (ex: bg-blue-500)',
+        /^#[0-9A-Fa-f]{6}$/i,
+        'A cor deve ser um valor hexadecimal válido (ex: #3b82f6)',
       )
       .openapi({
-        description: 'Classe utilitária de cor para a interface',
-        example: 'bg-blue-500',
+        description: 'Código hexadecimal da cor para a interface',
+        example: '#3b82f6',
       }),
   }),
 );
@@ -78,5 +78,9 @@ export const centerQuerySchema = z.object({
   includeBuildings: z.coerce.boolean().optional().default(false).openapi({
     description:
       'Se verdadeiro, inclui os prédios vinculados ao centro na resposta',
+  }),
+  includeScreens: z.coerce.boolean().optional().default(false).openapi({
+    description:
+      'Se verdadeiro, inclui as telas vinculadas ao centro na resposta',
   }),
 });

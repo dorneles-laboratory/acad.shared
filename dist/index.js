@@ -135,11 +135,11 @@ var createCenterSchema = registry.register(
       example: "CCT"
     }),
     color: z.string().regex(
-      /^bg-[a-z]+-\d{3}$/,
-      "A cor deve seguir o padr\xE3o do Tailwind (ex: bg-blue-500)"
+      /^#[0-9A-Fa-f]{6}$/i,
+      "A cor deve ser um valor hexadecimal v\xE1lido (ex: #3b82f6)"
     ).openapi({
-      description: "Classe utilit\xE1ria de cor para a interface",
-      example: "bg-blue-500"
+      description: "C\xF3digo hexadecimal da cor para a interface",
+      example: "#3b82f6"
     })
   })
 );
@@ -185,6 +185,9 @@ var centerQuerySchema = z.object({
   }),
   includeBuildings: z.coerce.boolean().optional().default(false).openapi({
     description: "Se verdadeiro, inclui os pr\xE9dios vinculados ao centro na resposta"
+  }),
+  includeScreens: z.coerce.boolean().optional().default(false).openapi({
+    description: "Se verdadeiro, inclui as telas vinculadas ao centro na resposta"
   })
 });
 
@@ -413,6 +416,159 @@ var screenQuerySchema = z.object({
   buildingId: z.string().uuid().optional()
 });
 
+// src/modules/content/content.enums.ts
+var ContentType = {
+  Image: "IMAGE",
+  Video: "VIDEO",
+  Notice: "NOTICE",
+  WebUrl: "WEB_URL"
+};
+var ContentStatus = {
+  Draft: "DRAFT",
+  Scheduled: "SCHEDULED",
+  Active: "ACTIVE",
+  Expired: "EXPIRED",
+  Archived: "ARCHIVED"
+};
+
+// src/modules/content/content.schemas.ts
+var contentTargetingSchema = z.object({
+  centers: z.array(z.string().uuid()).optional(),
+  buildings: z.array(z.string().uuid()).optional(),
+  screens: z.array(z.string().uuid()).optional()
+});
+var baseContentSchema = z.object({
+  title: z.string().min(2).max(120).trim().openapi({
+    description: "T\xEDtulo do conte\xFAdo",
+    example: "Aviso de Manuten\xE7\xE3o"
+  }),
+  type: z.nativeEnum(ContentType).openapi({
+    description: "Tipo de m\xEDdia do conte\xFAdo",
+    example: ContentType.Image
+  }),
+  status: z.nativeEnum(ContentStatus).optional().openapi({
+    description: "Status do conte\xFAdo",
+    example: ContentStatus.Draft
+  }),
+  startDate: z.coerce.date().optional().openapi({
+    description: "Data de in\xEDcio de exibi\xE7\xE3o",
+    example: "2026-08-20T08:00:00Z"
+  }),
+  endDate: z.coerce.date().optional().openapi({
+    description: "Data de fim de exibi\xE7\xE3o",
+    example: "2026-08-30T18:00:00Z"
+  }),
+  author: z.string().max(100).optional().openapi({
+    description: "Nome do autor ou departamento respons\xE1vel",
+    example: "Departamento de TI"
+  }),
+  contentUrl: z.string().url().optional().openapi({
+    description: "URL do conte\xFAdo"
+  }),
+  mediaUrl: z.string().url().optional().openapi({
+    description: "URL da m\xEDdia principal (imagem, v\xEDdeo ou p\xE1gina web)"
+  }),
+  textBody: z.string().optional().openapi({
+    description: "Corpo de texto caso seja um aviso escrito"
+  }),
+  targeting: contentTargetingSchema.optional().openapi({
+    description: "Configura\xE7\xE3o de segmenta\xE7\xE3o (Centros, Pr\xE9dios ou Telas espec\xEDficas)",
+    example: { centers: ["uuid-do-centro"], screens: ["uuid-da-tela"] }
+  })
+});
+var createContentSchema = registry.register(
+  "CreateContentRequest",
+  baseContentSchema.refine(
+    (data) => {
+      if (data.startDate && data.endDate) {
+        return data.startDate < data.endDate;
+      }
+      return true;
+    },
+    {
+      message: "A data de fim deve ser posterior \xE0 data de in\xEDcio.",
+      path: ["endDate"]
+    }
+  )
+);
+var updateContentSchema = registry.register(
+  "UpdateContentRequest",
+  baseContentSchema.extend({
+    status: z.nativeEnum(ContentStatus).openapi({
+      description: "Status atual do conte\xFAdo",
+      example: ContentStatus.Active
+    })
+  }).partial().refine((data) => Object.keys(data).length > 0, {
+    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
+  }).refine(
+    (data) => {
+      if (data.startDate && data.endDate) {
+        return data.startDate < data.endDate;
+      }
+      return true;
+    },
+    {
+      message: "A data de fim deve ser posterior \xE0 data de in\xEDcio.",
+      path: ["endDate"]
+    }
+  )
+);
+var contentResponseSchema = registry.register(
+  "ContentResponse",
+  z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    type: z.nativeEnum(ContentType),
+    status: z.nativeEnum(ContentStatus),
+    startDate: z.date().nullable(),
+    endDate: z.date().nullable(),
+    author: z.string().nullable(),
+    contentUrl: z.string().nullable(),
+    mediaUrl: z.string().nullable(),
+    textBody: z.string().nullable(),
+    targeting: contentTargetingSchema.nullable(),
+    ownerId: z.string().uuid(),
+    owner: userResponseSchema.optional(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+  })
+);
+var contentIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID do conte\xFAdo deve ser um UUID v\xE1lido." }).openapi({
+    param: { name: "id", in: "path" }
+  })
+});
+var contentQuerySchema = z.object({
+  page: z.coerce.number().optional().default(1),
+  limit: z.coerce.number().optional().default(10),
+  query: z.string().optional().openapi({
+    description: "Busca por t\xEDtulo ou autor",
+    example: "Manuten\xE7\xE3o"
+  }),
+  status: z.nativeEnum(ContentStatus).optional().openapi({
+    description: "Filtra pelo status do conte\xFAdo",
+    example: ContentStatus.Active
+  }),
+  type: z.nativeEnum(ContentType).optional().openapi({
+    description: "Filtra pelo tipo do conte\xFAdo",
+    example: ContentType.Image
+  })
+});
+
+// src/modules/upload/upload.schemas.ts
+var uploadResponseSchema = registry.register(
+  "UploadResponse",
+  z.object({
+    url: z.string().openapi({
+      description: "URL p\xFAblica est\xE1tica do arquivo salvo no servidor",
+      example: "/uploads/a1b2c3d4e5f6g7h8.jpg"
+    })
+  })
+);
+
+// src/modules/upload/upload.types.ts
+import "zod";
+
 // src/utils/date-time.ts
 function timeStringToMinutes(timeString) {
   const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]$/;
@@ -431,6 +587,8 @@ function formatMinutesToReadable(minutes) {
 }
 export {
   AuthEnums,
+  ContentStatus,
+  ContentType,
   OpenApiGeneratorV3,
   ScreenStatus,
   SystemStatus,
@@ -441,8 +599,13 @@ export {
   centerIdSchema,
   centerQuerySchema,
   centerResponseSchema,
+  contentIdSchema,
+  contentQuerySchema,
+  contentResponseSchema,
+  contentTargetingSchema,
   createBuildingSchema,
   createCenterSchema,
+  createContentSchema,
   createPaginatedResponseSchema,
   createScreenSchema,
   createUserSchema,
@@ -461,8 +624,10 @@ export {
   timeStringToMinutes,
   updateBuildingSchema,
   updateCenterSchema,
+  updateContentSchema,
   updateScreenSchema,
   updateUserSchema,
+  uploadResponseSchema,
   userIdSchema,
   userResponseSchema,
   z
