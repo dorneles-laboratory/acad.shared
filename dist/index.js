@@ -615,6 +615,28 @@ var playlistBuildingQuerySchema = z.object({
   })
 });
 
+// src/modules/kiosk/kiosk.schemas.ts
+var kioskPlaylistItemResponseSchema = registry.register(
+  "KioskPlaylistItemResponse",
+  z.object({
+    id: z.string().uuid(),
+    duration: z.number().int(),
+    order: z.number().int(),
+    content: contentResponseSchema
+  })
+);
+var kioskPlaylistResponseSchema = registry.register(
+  "KioskPlaylistResponse",
+  z.object({
+    screenName: z.string(),
+    lastUpdated: z.string().nullable().openapi({
+      description: "Timestamp ISO da \xFAltima altera\xE7\xE3o na playlist (usado para checar sincroniza\xE7\xE3o)",
+      example: "2026-08-17T20:00:00.000Z"
+    }),
+    items: z.array(kioskPlaylistItemResponseSchema)
+  })
+);
+
 // src/utils/date-time.ts
 function timeStringToMinutes(timeString) {
   const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]$/;
@@ -657,6 +679,8 @@ export {
   createUserSchema,
   formatMinutesToReadable,
   ipv4Schema,
+  kioskPlaylistItemResponseSchema,
+  kioskPlaylistResponseSchema,
   loginSchema,
   minutesToDecimalHours,
   paginationMetaSchema,
