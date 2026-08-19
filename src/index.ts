@@ -6,6 +6,7 @@ export * from './modules/screens';
 export * from './modules/content';
 export * from './modules/upload';
 export * from './modules/playlist';
+export * from './modules/kiosk';
 
 export * from './common/';
 
