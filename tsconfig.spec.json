@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json", // Herda todas as configurações básicas
+  "include": ["src/**/*", "tests/**/*"] // Permite que o editor leia os testes perfeitamente
+}
