@@ -116,7 +116,7 @@ export const updateUserSchema = registry.register(
       }),
 
       isActive: z.boolean().optional(),
-      mediaUrl: z.string().url().optional().openapi({
+      imageUrl: z.string().url().optional().openapi({
         description: 'URL da foto de perfil do usuário',
         example: 'https://example.com/image.jpg',
       }),
