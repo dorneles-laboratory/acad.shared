@@ -116,6 +116,10 @@ export const updateUserSchema = registry.register(
       }),
 
       isActive: z.boolean().optional(),
+      mediaUrl: z.string().url().optional().openapi({
+        description: 'URL da foto de perfil do usuário',
+        example: 'https://example.com/image.jpg',
+      }),
     })
     .refine((data) => Object.keys(data).length > 0, {
       message: 'Pelo menos um campo deve ser fornecido para atualização.',

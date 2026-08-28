@@ -53,6 +53,7 @@ declare const updateUserSchema: z.ZodObject<{
     }>>;
     centerId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     isActive: z.ZodOptional<z.ZodBoolean>;
+    mediaUrl: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 declare const userResponseSchema: z.ZodObject<{
     id: z.ZodString;
