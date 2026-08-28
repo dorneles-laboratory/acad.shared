@@ -250,7 +250,7 @@ var updateUserSchema = registry.register(
       example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
     }),
     isActive: z.boolean().optional(),
-    mediaUrl: z.string().url().optional().openapi({
+    imageUrl: z.string().url().optional().openapi({
       description: "URL da foto de perfil do usu\xE1rio",
       example: "https://example.com/image.jpg"
     })
