@@ -249,7 +249,11 @@ var updateUserSchema = registry.register(
       description: "UUID do Centro Acad\xEAmico associado ao usu\xE1rio",
       example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
     }),
-    isActive: z.boolean().optional()
+    isActive: z.boolean().optional(),
+    mediaUrl: z.string().url().optional().openapi({
+      description: "URL da foto de perfil do usu\xE1rio",
+      example: "https://example.com/image.jpg"
+    })
   }).refine((data) => Object.keys(data).length > 0, {
     message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
   })
