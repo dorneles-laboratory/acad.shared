@@ -265,6 +265,7 @@ var userResponseSchema = registry.register(
     name: z.string(),
     email: z.string().email(),
     role: z.nativeEnum(UserRole),
+    imageUrl: z.string().url().nullable(),
     isActive: z.boolean(),
     centerId: z.string().uuid().nullable(),
     center: centerResponseSchema.optional(),

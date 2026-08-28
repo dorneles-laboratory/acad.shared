@@ -64,6 +64,7 @@ declare const userResponseSchema: z.ZodObject<{
         readonly CenterAdmin: "CENTER_ADMIN";
         readonly Publisher: "PUBLISHER";
     }>;
+    imageUrl: z.ZodNullable<z.ZodString>;
     isActive: z.ZodBoolean;
     centerId: z.ZodNullable<z.ZodString>;
     center: z.ZodOptional<z.ZodObject<{
@@ -401,6 +402,7 @@ declare const contentResponseSchema: z.ZodObject<{
             readonly CenterAdmin: "CENTER_ADMIN";
             readonly Publisher: "PUBLISHER";
         }>;
+        imageUrl: z.ZodNullable<z.ZodString>;
         isActive: z.ZodBoolean;
         centerId: z.ZodNullable<z.ZodString>;
         center: z.ZodOptional<z.ZodObject<{
@@ -540,6 +542,7 @@ declare const playlistItemResponseSchema: z.ZodObject<{
                 readonly CenterAdmin: "CENTER_ADMIN";
                 readonly Publisher: "PUBLISHER";
             }>;
+            imageUrl: z.ZodNullable<z.ZodString>;
             isActive: z.ZodBoolean;
             centerId: z.ZodNullable<z.ZodString>;
             center: z.ZodOptional<z.ZodObject<{
@@ -624,6 +627,7 @@ declare const kioskPlaylistItemResponseSchema: z.ZodObject<{
                 readonly CenterAdmin: "CENTER_ADMIN";
                 readonly Publisher: "PUBLISHER";
             }>;
+            imageUrl: z.ZodNullable<z.ZodString>;
             isActive: z.ZodBoolean;
             centerId: z.ZodNullable<z.ZodString>;
             center: z.ZodOptional<z.ZodObject<{
@@ -697,6 +701,7 @@ declare const kioskPlaylistResponseSchema: z.ZodObject<{
                     readonly CenterAdmin: "CENTER_ADMIN";
                     readonly Publisher: "PUBLISHER";
                 }>;
+                imageUrl: z.ZodNullable<z.ZodString>;
                 isActive: z.ZodBoolean;
                 centerId: z.ZodNullable<z.ZodString>;
                 center: z.ZodOptional<z.ZodObject<{
