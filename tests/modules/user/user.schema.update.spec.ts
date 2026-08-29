@@ -9,8 +9,6 @@ describe('updateUserSchema Unit Tests', () => {
     // Act
     const result = updateUserSchema.safeParse(invalidUser);
 
-    console.log('👀 VEJA O QUE O ZOD RETORNOU:', result);
-
     // Assert
     expect(result.success).toBe(false);
 
