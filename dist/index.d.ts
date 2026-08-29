@@ -35,18 +35,32 @@ declare const createUserSchema: z.ZodObject<{
     email: z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>;
     password: z.ZodString;
     isActive: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
+    role: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        readonly Admin: "ADMIN";
+        readonly User: "USER";
+    }>>>;
 }, z.core.$strip>;
 declare const updateUserSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>>;
     password: z.ZodOptional<z.ZodString>;
     isActive: z.ZodOptional<z.ZodBoolean>;
+    role: z.ZodOptional<z.ZodEnum<{
+        readonly Admin: "ADMIN";
+        readonly User: "USER";
+    }>>;
+    imageUrl: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 declare const userResponseSchema: z.ZodObject<{
     id: z.ZodString;
     name: z.ZodString;
     email: z.ZodString;
     isActive: z.ZodBoolean;
+    imageUrl: z.ZodNullable<z.ZodString>;
+    role: z.ZodEnum<{
+        readonly Admin: "ADMIN";
+        readonly User: "USER";
+    }>;
     created_at: z.ZodCoercedDate<unknown>;
     updated_at: z.ZodCoercedDate<unknown>;
 }, z.core.$strip>;
@@ -96,159 +110,110 @@ type UserIdDTO = z.infer<typeof userIdSchema>;
 type UserResponseDTO = z.infer<typeof userResponseSchema>;
 type PaginatedUsersDTO = PaginatedResultDTO<UserResponseDTO>;
 
-declare const createPropertySchema: z.ZodObject<{
-    name: z.ZodString;
-    location: z.ZodString;
-    car: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
-declare const updatePropertySchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    location: z.ZodOptional<z.ZodString>;
-    car: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Configure: "CONFIGURE";
-    }>>;
-}, z.core.$strip>;
-declare const propertyResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    location: z.ZodString;
-    car: z.ZodNullable<z.ZodString>;
-    status: z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Configure: "CONFIGURE";
-    }>;
-    ownerId: z.ZodString;
-    owner: z.ZodOptional<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        email: z.ZodString;
-        isActive: z.ZodBoolean;
-        created_at: z.ZodCoercedDate<unknown>;
-        updated_at: z.ZodCoercedDate<unknown>;
-    }, z.core.$strip>>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
-}, z.core.$strip>;
-declare const propertyIdSchema: z.ZodObject<{
-    id: z.ZodString;
-}, z.core.$strip>;
-declare const propertyQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    query: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Configure: "CONFIGURE";
-    }>>;
-}, z.core.$strip>;
-
-declare const PropertyStatus: {
-    readonly Active: "ACTIVE";
-    readonly Configure: "CONFIGURE";
+/**
+ * Enums global object, exports all domains used within the system.
+ */
+declare const UserEnums: {
+    UserRole: {
+        readonly Admin: "ADMIN";
+        readonly User: "USER";
+    };
 };
-type EnumPropertyStatus = (typeof PropertyStatus)[keyof typeof PropertyStatus];
+type EnumUserRole = (typeof UserEnums.UserRole)[keyof typeof UserEnums.UserRole];
 
-type CreatePropertyDTO = z.infer<typeof createPropertySchema>;
-type UpdatePropertyDTO = z.infer<typeof updatePropertySchema>;
-type PropertyResponseDTO = z.infer<typeof propertyResponseSchema>;
-type PropertyIdDTO = z.infer<typeof propertyIdSchema>;
-type PropertyQueryDTO = z.infer<typeof propertyQuerySchema>;
-type PaginatedPropertiesDTO = PaginatedResultDTO<PropertyResponseDTO>;
-
-declare const coordinateSchema: z.ZodObject<{
-    x: z.ZodNumber;
-    y: z.ZodNumber;
-}, z.core.$strip>;
-declare const createFieldSchema: z.ZodObject<{
+declare const createToolSchema: z.ZodObject<{
+    slug: z.ZodString;
     name: z.ZodString;
-    soilType: z.ZodOptional<z.ZodString>;
-    coordinates: z.ZodArray<z.ZodObject<{
-        x: z.ZodNumber;
-        y: z.ZodNumber;
-    }, z.core.$strip>>;
-    propertyId: z.ZodString;
-}, z.core.$strip>;
-declare const updateFieldSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    soilType: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    coordinates: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        x: z.ZodNumber;
-        y: z.ZodNumber;
-    }, z.core.$strip>>>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Ready: "READY";
-        readonly Processing: "PROCESSING";
-        readonly Waiting: "WAITING";
-    }>>;
-}, z.core.$strip>;
-declare const fieldResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    code: z.ZodString;
-    soilType: z.ZodNullable<z.ZodString>;
-    area: z.ZodNullable<z.ZodNumber>;
-    perimeter: z.ZodNullable<z.ZodNumber>;
-    coordinates: z.ZodNullable<z.ZodAny>;
-    status: z.ZodEnum<{
-        readonly Ready: "READY";
-        readonly Processing: "PROCESSING";
-        readonly Waiting: "WAITING";
+    tagline: z.ZodString;
+    description: z.ZodString;
+    category: z.ZodEnum<{
+        readonly CarrerAndResume: "CAREER_AND_RESUME";
+        readonly ResearchAndPublication: "RESEARCH_AND_PUBLICATION";
+        readonly AcademicPlanning: "ACADEMIC_PLANNING";
+        readonly Opportunities: "OPPORTUNITIES";
+        readonly Documentation: "DOCUMENTATION";
+        readonly AcademicIntelligence: "ACADEMIC_INTELLIGENCE";
     }>;
-    propertyId: z.ZodString;
-    property: z.ZodOptional<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        location: z.ZodString;
-        car: z.ZodNullable<z.ZodString>;
-        status: z.ZodEnum<{
-            readonly Active: "ACTIVE";
-            readonly Configure: "CONFIGURE";
-        }>;
-        ownerId: z.ZodString;
-        owner: z.ZodOptional<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            email: z.ZodString;
-            isActive: z.ZodBoolean;
-            created_at: z.ZodCoercedDate<unknown>;
-            updated_at: z.ZodCoercedDate<unknown>;
-        }, z.core.$strip>>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
-    }, z.core.$strip>>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
+    status: z.ZodEnum<{
+        readonly Available: "AVAILABLE";
+        readonly ComingSoon: "COMING_SOON";
+    }>;
+    iconName: z.ZodString;
+    isNew: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
 }, z.core.$strip>;
-declare const fieldIdSchema: z.ZodObject<{
+declare const updateToolSchema: z.ZodObject<{
+    slug: z.ZodOptional<z.ZodString>;
+    name: z.ZodOptional<z.ZodString>;
+    tagline: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodEnum<{
+        readonly CarrerAndResume: "CAREER_AND_RESUME";
+        readonly ResearchAndPublication: "RESEARCH_AND_PUBLICATION";
+        readonly AcademicPlanning: "ACADEMIC_PLANNING";
+        readonly Opportunities: "OPPORTUNITIES";
+        readonly Documentation: "DOCUMENTATION";
+        readonly AcademicIntelligence: "ACADEMIC_INTELLIGENCE";
+    }>>;
+    status: z.ZodOptional<z.ZodEnum<{
+        readonly Available: "AVAILABLE";
+        readonly ComingSoon: "COMING_SOON";
+    }>>;
+    iconName: z.ZodOptional<z.ZodString>;
+    isNew: z.ZodOptional<z.ZodOptional<z.ZodDefault<z.ZodBoolean>>>;
+}, z.core.$strip>;
+declare const toolIdSchema: z.ZodObject<{
     id: z.ZodString;
 }, z.core.$strip>;
-declare const fieldQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    propertyId: z.ZodOptional<z.ZodString>;
-    query: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Ready: "READY";
-        readonly Processing: "PROCESSING";
-        readonly Waiting: "WAITING";
-    }>>;
+declare const toolResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    slug: z.ZodString;
+    name: z.ZodString;
+    tagline: z.ZodString;
+    description: z.ZodString;
+    category: z.ZodEnum<{
+        readonly CarrerAndResume: "CAREER_AND_RESUME";
+        readonly ResearchAndPublication: "RESEARCH_AND_PUBLICATION";
+        readonly AcademicPlanning: "ACADEMIC_PLANNING";
+        readonly Opportunities: "OPPORTUNITIES";
+        readonly Documentation: "DOCUMENTATION";
+        readonly AcademicIntelligence: "ACADEMIC_INTELLIGENCE";
+    }>;
+    status: z.ZodEnum<{
+        readonly Available: "AVAILABLE";
+        readonly ComingSoon: "COMING_SOON";
+    }>;
+    iconName: z.ZodString;
+    isNew: z.ZodBoolean;
+    uses: z.ZodOptional<z.ZodNumber>;
+    interested: z.ZodOptional<z.ZodNumber>;
+    lastUsed: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    pinned: z.ZodOptional<z.ZodBoolean>;
+    createdAt: z.ZodCoercedDate<unknown>;
+    updatedAt: z.ZodCoercedDate<unknown>;
 }, z.core.$strip>;
 
-declare const FieldStatus: {
-    readonly Ready: "READY";
-    readonly Processing: "PROCESSING";
-    readonly Waiting: "WAITING";
+declare const ToolkitEnums: {
+    Category: {
+        readonly CarrerAndResume: "CAREER_AND_RESUME";
+        readonly ResearchAndPublication: "RESEARCH_AND_PUBLICATION";
+        readonly AcademicPlanning: "ACADEMIC_PLANNING";
+        readonly Opportunities: "OPPORTUNITIES";
+        readonly Documentation: "DOCUMENTATION";
+        readonly AcademicIntelligence: "ACADEMIC_INTELLIGENCE";
+    };
+    Status: {
+        readonly Available: "AVAILABLE";
+        readonly ComingSoon: "COMING_SOON";
+    };
 };
-type EnumFieldStatus = (typeof FieldStatus)[keyof typeof FieldStatus];
+type EnumToolkitCategory = (typeof ToolkitEnums.Category)[keyof typeof ToolkitEnums.Category];
+type EnumToolkitStatus = (typeof ToolkitEnums.Status)[keyof typeof ToolkitEnums.Status];
 
-type CreateFieldDTO = z.infer<typeof createFieldSchema>;
-type UpdateFieldDTO = z.infer<typeof updateFieldSchema>;
-type FieldResponseDTO = z.infer<typeof fieldResponseSchema>;
-type FieldIdDTO = z.infer<typeof fieldIdSchema>;
-type FieldQueryDTO = z.infer<typeof fieldQuerySchema>;
-type PaginatedFieldsDTO = PaginatedResultDTO<FieldResponseDTO>;
+type CreateToolDTO = z.infer<typeof createToolSchema>;
+type UpdateToolDTO = z.infer<typeof updateToolSchema>;
+type ToolIdDTO = z.infer<typeof toolIdSchema>;
+type ToolResponseDTO = z.infer<typeof toolResponseSchema>;
+type PaginatedToolsDTO = PaginatedResultDTO<ToolResponseDTO>;
 
 /**
  * Converte string "HH:mm" em minutos totais desde a meia-noite.
@@ -263,4 +228,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type CreateFieldDTO, type CreatePropertyDTO, type CreateUserDTO, type EnumFieldStatus, type EnumLoginStatus, type EnumPropertyStatus, type FieldIdDTO, type FieldQueryDTO, type FieldResponseDTO, FieldStatus, type LoginAuthDTO, type PaginatedFieldsDTO, type PaginatedPropertiesDTO, type PaginatedResultDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type PropertyIdDTO, type PropertyQueryDTO, type PropertyResponseDTO, PropertyStatus, type TokenPayloadDTO, type UpdateFieldDTO, type UpdatePropertyDTO, type UpdateUserDTO, type UserIdDTO, type UserResponseDTO, coordinateSchema, createFieldSchema, createPaginatedResponseSchema, createPropertySchema, createUserSchema, fieldIdSchema, fieldQuerySchema, fieldResponseSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, propertyIdSchema, propertyQuerySchema, propertyResponseSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, updateFieldSchema, updatePropertySchema, updateUserSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type CreateToolDTO, type CreateUserDTO, type EnumLoginStatus, type EnumToolkitCategory, type EnumToolkitStatus, type EnumUserRole, type LoginAuthDTO, type PaginatedResultDTO, type PaginatedToolsDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type TokenPayloadDTO, type ToolIdDTO, type ToolResponseDTO, ToolkitEnums, type UpdateToolDTO, type UpdateUserDTO, UserEnums, type UserIdDTO, type UserResponseDTO, createPaginatedResponseSchema, createToolSchema, createUserSchema, formatMinutesToReadable, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, refreshTokenSchema, registry, rfc7807ErrorSchema, timeStringToMinutes, toolIdSchema, toolResponseSchema, updateToolSchema, updateUserSchema, userIdSchema, userResponseSchema };

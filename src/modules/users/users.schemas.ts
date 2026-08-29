@@ -1,4 +1,6 @@
 import { z, registry } from '../../lib/registry';
+import { AuthEnums } from '../auth';
+import { UserEnums } from './users.enums';
 
 export const createUserSchema = registry.register(
   'CreateUserRequest',
@@ -47,28 +49,15 @@ export const createUserSchema = registry.register(
         description: 'Senha do usuário com critérios de segurança',
         example: 'Senha@123',
       }),
-
-    // cellphone: z.string().trim().optional().openapi({
-    //   description: 'Número de celular do usuário',
-    //   example: '(55) 99999-9999',
-    // }),
-
-    // birth_date: z.coerce
-    //   .date({
-    //     message: 'A data de nascimento deve ser válida.',
-    //   })
-    //   .optional()
-    //   .openapi({
-    //     description: 'Data de nascimento do usuário (YYYY-MM-DD)',
-    //     example: '1990-01-01',
-    //   }),
-
-    // address: z.string().trim().optional().openapi({
-    //   description: 'Endereço do usuário',
-    //   example: 'Rua Exemplo, 123 - Cidade/UF',
-    // }),
-
     isActive: z.boolean().default(true).optional(),
+    role: z
+      .nativeEnum(UserEnums.UserRole)
+      .default(UserEnums.UserRole.User)
+      .optional()
+      .openapi({
+        description: 'Função do usuário no sistema',
+        example: UserEnums.UserRole.User,
+      }),
   }),
 );
 
@@ -89,12 +78,24 @@ export const updateUserSchema = createUserSchema
           'Nova senha do usuário (opcional, com critérios de segurança)',
         example: 'NovaSenha@123',
       }),
-
     isActive: z.boolean().optional(),
+    role: z.nativeEnum(UserEnums.UserRole).optional().openapi({
+      description: 'Nova função do usuário no sistema (opcional)',
+      example: UserEnums.UserRole.Admin,
+    }),
+    imageUrl: z.string().url().optional().openapi({
+      description: 'URL da imagem de perfil do usuário',
+      example: 'https://example.com/profile.jpg',
+    }),
   })
-  .refine((data) => Object.keys(data).length > 0, {
-    message: 'Pelo menos um campo deve ser fornecido para atualização.',
-  });
+  .refine(
+    (data) => {
+      return Object.values(data).some((value) => value !== undefined);
+    },
+    {
+      message: 'Pelo menos um campo deve ser fornecido para atualização.',
+    },
+  );
 
 // O Schema de Resposta
 export const userResponseSchema = registry.register(
@@ -103,13 +104,11 @@ export const userResponseSchema = registry.register(
     id: z.string().uuid(),
     name: z.string(),
     email: z.string().email(),
-    // cellphone: z.string().nullable(),
-    // birth_date: z.coerce.date().nullable(),
-    // address: z.string().nullable(),
     isActive: z.boolean(),
+    imageUrl: z.string().url().nullable(),
+    role: z.nativeEnum(UserEnums.UserRole),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
-    // deletedAt: z.coerce.date().nullable(),
   }),
 );
 

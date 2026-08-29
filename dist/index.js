@@ -47,6 +47,14 @@ var AuthEnums = {
   }
 };
 
+// src/modules/users/users.enums.ts
+var UserEnums = {
+  UserRole: {
+    Admin: "ADMIN",
+    User: "USER"
+  }
+};
+
 // src/modules/users/users.schemas.ts
 var createUserSchema = registry.register(
   "CreateUserRequest",
@@ -69,24 +77,11 @@ var createUserSchema = registry.register(
       description: "Senha do usu\xE1rio com crit\xE9rios de seguran\xE7a",
       example: "Senha@123"
     }),
-    // cellphone: z.string().trim().optional().openapi({
-    //   description: 'Número de celular do usuário',
-    //   example: '(55) 99999-9999',
-    // }),
-    // birth_date: z.coerce
-    //   .date({
-    //     message: 'A data de nascimento deve ser válida.',
-    //   })
-    //   .optional()
-    //   .openapi({
-    //     description: 'Data de nascimento do usuário (YYYY-MM-DD)',
-    //     example: '1990-01-01',
-    //   }),
-    // address: z.string().trim().optional().openapi({
-    //   description: 'Endereço do usuário',
-    //   example: 'Rua Exemplo, 123 - Cidade/UF',
-    // }),
-    isActive: z.boolean().default(true).optional()
+    isActive: z.boolean().default(true).optional(),
+    role: z.nativeEnum(UserEnums.UserRole).default(UserEnums.UserRole.User).optional().openapi({
+      description: "Fun\xE7\xE3o do usu\xE1rio no sistema",
+      example: UserEnums.UserRole.User
+    })
   })
 );
 var updateUserSchema = createUserSchema.partial().omit({ password: true }).extend({
@@ -94,23 +89,34 @@ var updateUserSchema = createUserSchema.partial().omit({ password: true }).exten
     description: "Nova senha do usu\xE1rio (opcional, com crit\xE9rios de seguran\xE7a)",
     example: "NovaSenha@123"
   }),
-  isActive: z.boolean().optional()
-}).refine((data) => Object.keys(data).length > 0, {
-  message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
-});
+  isActive: z.boolean().optional(),
+  role: z.nativeEnum(UserEnums.UserRole).optional().openapi({
+    description: "Nova fun\xE7\xE3o do usu\xE1rio no sistema (opcional)",
+    example: UserEnums.UserRole.Admin
+  }),
+  imageUrl: z.string().url().optional().openapi({
+    description: "URL da imagem de perfil do usu\xE1rio",
+    example: "https://example.com/profile.jpg"
+  })
+}).refine(
+  (data) => {
+    return Object.values(data).some((value) => value !== void 0);
+  },
+  {
+    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
+  }
+);
 var userResponseSchema = registry.register(
   "UserResponse",
   z.object({
     id: z.string().uuid(),
     name: z.string(),
     email: z.string().email(),
-    // cellphone: z.string().nullable(),
-    // birth_date: z.coerce.date().nullable(),
-    // address: z.string().nullable(),
     isActive: z.boolean(),
+    imageUrl: z.string().url().nullable(),
+    role: z.nativeEnum(UserEnums.UserRole),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date()
-    // deletedAt: z.coerce.date().nullable(),
   })
 );
 var userIdSchema = z.object({
@@ -126,152 +132,95 @@ var userIdSchema = z.object({
   })
 });
 
-// src/modules/property/property.enums.ts
-var PropertyStatus = {
-  Active: "ACTIVE",
-  Configure: "CONFIGURE"
+// src/modules/toolkit/toolkit.enums.ts
+var ToolkitEnums = {
+  Category: {
+    CarrerAndResume: "CAREER_AND_RESUME",
+    ResearchAndPublication: "RESEARCH_AND_PUBLICATION",
+    AcademicPlanning: "ACADEMIC_PLANNING",
+    Opportunities: "OPPORTUNITIES",
+    Documentation: "DOCUMENTATION",
+    AcademicIntelligence: "ACADEMIC_INTELLIGENCE"
+  },
+  Status: {
+    Available: "AVAILABLE",
+    ComingSoon: "COMING_SOON"
+  }
 };
 
-// src/modules/property/property.schemas.ts
-var createPropertySchema = registry.register(
-  "CreatePropertyRequest",
+// src/modules/toolkit/toolkit.schemas.ts
+var createToolSchema = registry.register(
+  "CreateToolRequest",
   z.object({
-    name: z.string().min(2).max(120).trim().openapi({
-      description: "Nome da propriedade",
-      example: "Fazenda Rio Grande"
+    slug: z.string().min(2).max(50).trim().openapi({
+      description: "Identificador \xFAnico amig\xE1vel para URLs (kebab-case)",
+      example: "resume-builder"
     }),
-    location: z.string().min(2).max(120).trim().openapi({
-      description: "Localiza\xE7\xE3o/Cidade da propriedade",
-      example: "Santa Maria, RS"
+    name: z.string().min(2).max(100).trim().openapi({
+      description: "Nome de exibi\xE7\xE3o da ferramenta",
+      example: "Resume Builder"
     }),
-    car: z.string().min(5).trim().optional().openapi({
-      description: "Cadastro Ambiental Rural (CAR)",
-      example: "RS-4316907-1A2B3C4D5E6F7G8H9I0J"
-    })
+    tagline: z.string().min(5).max(150).trim().openapi({
+      description: "Frase de efeito curta",
+      example: "Gerador inteligente de curriculo academico"
+    }),
+    description: z.string().min(10).max(500).trim().openapi({
+      description: "Descri\xE7\xE3o detalhada do funcionamento",
+      example: "Transforme experiencias e projetos em curriculos profissionais."
+    }),
+    category: z.nativeEnum(ToolkitEnums.Category).openapi({
+      description: "Categoria organizacional da ferramenta",
+      example: ToolkitEnums.Category.CarrerAndResume
+    }),
+    status: z.nativeEnum(ToolkitEnums.Status).openapi({
+      description: "Status atual de disponibilidade",
+      example: ToolkitEnums.Status.Available
+    }),
+    iconName: z.string().min(2).max(50).trim().openapi({
+      description: "Nome do \xEDcone da biblioteca Lucide React",
+      example: "FileText"
+    }),
+    isNew: z.boolean().default(false).optional()
   })
 );
-var updatePropertySchema = registry.register(
-  "UpdatePropertyRequest",
-  createPropertySchema.extend({
-    status: z.nativeEnum(PropertyStatus).openapi({
-      description: "Status de configura\xE7\xE3o da propriedade",
-      example: PropertyStatus.Active
-    })
-  }).partial().refine((data) => Object.keys(data).length > 0, {
+var updateToolSchema = createToolSchema.partial().refine(
+  (data) => {
+    return Object.values(data).some((value) => value !== void 0);
+  },
+  {
     message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
-  })
+  }
 );
-var propertyResponseSchema = registry.register(
-  "PropertyResponse",
+var toolIdSchema = z.object({
+  id: z.string().uuid({ message: "O ID da ferramenta deve ser um UUID v\xE1lido." }).openapi({
+    param: { name: "id", in: "path" },
+    description: "UUID Identificador da ferramenta",
+    example: "a1b2c3d4-e5f6-7890-1234-56789abcdef0"
+  })
+});
+var toolResponseSchema = registry.register(
+  "ToolResponse",
   z.object({
     id: z.string().uuid(),
+    slug: z.string(),
     name: z.string(),
-    location: z.string(),
-    car: z.string().nullable(),
-    status: z.nativeEnum(PropertyStatus),
-    ownerId: z.string().uuid(),
-    owner: userResponseSchema.optional(),
-    createdAt: z.date(),
-    updatedAt: z.date()
+    tagline: z.string(),
+    description: z.string(),
+    category: z.nativeEnum(ToolkitEnums.Category),
+    status: z.nativeEnum(ToolkitEnums.Status),
+    iconName: z.string(),
+    isNew: z.boolean(),
+    uses: z.number().optional(),
+    interested: z.number().optional(),
+    lastUsed: z.string().nullable().optional(),
+    pinned: z.boolean().optional(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date()
   })
 );
-var propertyIdSchema = z.object({
-  id: z.string().uuid({ message: "O ID da propriedade deve ser um UUID v\xE1lido." }).openapi({
-    param: { name: "id", in: "path" }
-  })
-});
-var propertyQuerySchema = z.object({
-  page: z.coerce.number().optional().default(1),
-  limit: z.coerce.number().optional().default(10),
-  query: z.string().optional().openapi({
-    description: "Busca por nome, cidade ou CAR",
-    example: "Fazenda"
-  }),
-  status: z.nativeEnum(PropertyStatus).optional().openapi({
-    description: "Filtra pelo status da propriedade",
-    example: PropertyStatus.Active
-  })
-});
 
-// src/modules/field/field.enums.ts
-var FieldStatus = {
-  Ready: "READY",
-  Processing: "PROCESSING",
-  Waiting: "WAITING"
-};
-
-// src/modules/field/field.schemas.ts
-var coordinateSchema = z.object({
-  x: z.number(),
-  y: z.number()
-});
-var createFieldSchema = registry.register(
-  "CreateFieldRequest",
-  z.object({
-    name: z.string().min(2).max(120).trim().openapi({
-      description: "Nome do talh\xE3o",
-      example: "Talh\xE3o da Sede"
-    }),
-    soilType: z.string().optional().openapi({
-      description: "Tipo de solo",
-      example: "Latossolo Vermelho"
-    }),
-    coordinates: z.array(coordinateSchema).min(3).openapi({
-      description: "V\xE9rtices do pol\xEDgono desenhado"
-    }),
-    propertyId: z.string().uuid().openapi({
-      description: "ID da propriedade a qual este talh\xE3o pertence"
-    })
-  })
-);
-var updateFieldSchema = registry.register(
-  "UpdateFieldRequest",
-  createFieldSchema.omit({ propertyId: true }).extend({
-    status: z.nativeEnum(FieldStatus).openapi({
-      description: "Status de processamento do talh\xE3o",
-      example: FieldStatus.Ready
-    })
-  }).partial().refine((data) => Object.keys(data).length > 0, {
-    message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
-  })
-);
-var fieldResponseSchema = registry.register(
-  "FieldResponse",
-  z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    code: z.string(),
-    soilType: z.string().nullable(),
-    area: z.number().nullable(),
-    perimeter: z.number().nullable(),
-    coordinates: z.any().nullable(),
-    status: z.nativeEnum(FieldStatus),
-    propertyId: z.string().uuid(),
-    property: propertyResponseSchema.optional(),
-    createdAt: z.date(),
-    updatedAt: z.date()
-  })
-);
-var fieldIdSchema = z.object({
-  id: z.string().uuid({ message: "O ID do talh\xE3o deve ser um UUID v\xE1lido." }).openapi({
-    param: { name: "id", in: "path" }
-  })
-});
-var fieldQuerySchema = z.object({
-  page: z.coerce.number().optional().default(1),
-  limit: z.coerce.number().optional().default(10),
-  propertyId: z.string().uuid().optional().openapi({
-    description: "Filtra os talh\xF5es por uma propriedade espec\xEDfica"
-  }),
-  query: z.string().optional().openapi({
-    description: "Busca por nome ou c\xF3digo do talh\xE3o",
-    example: "TAL-001"
-  }),
-  status: z.nativeEnum(FieldStatus).optional().openapi({
-    description: "Filtra pelo status do talh\xE3o",
-    example: FieldStatus.Ready
-  })
-});
+// src/modules/toolkit/toolkit.types.ts
+import "zod";
 
 // src/common/common.schemas.ts
 var rfc7807ErrorSchema = registry.register(
@@ -349,31 +298,24 @@ function formatMinutesToReadable(minutes) {
 }
 export {
   AuthEnums,
-  FieldStatus,
   OpenApiGeneratorV3,
-  PropertyStatus,
-  coordinateSchema,
-  createFieldSchema,
+  ToolkitEnums,
+  UserEnums,
   createPaginatedResponseSchema,
-  createPropertySchema,
+  createToolSchema,
   createUserSchema,
-  fieldIdSchema,
-  fieldQuerySchema,
-  fieldResponseSchema,
   formatMinutesToReadable,
   loginSchema,
   minutesToDecimalHours,
   paginationMetaSchema,
   paginationSchema,
-  propertyIdSchema,
-  propertyQuerySchema,
-  propertyResponseSchema,
   refreshTokenSchema,
   registry,
   rfc7807ErrorSchema,
   timeStringToMinutes,
-  updateFieldSchema,
-  updatePropertySchema,
+  toolIdSchema,
+  toolResponseSchema,
+  updateToolSchema,
   updateUserSchema,
   userIdSchema,
   userResponseSchema,
