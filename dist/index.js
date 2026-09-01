@@ -364,6 +364,10 @@ var ScreenStatus = {
   Offline: "OFFLINE",
   Syncing: "SYNCING"
 };
+var PairingRequestStatus = {
+  Pending: "PENDING",
+  Approved: "APPROVED"
+};
 
 // src/modules/screens/screens.schemas.ts
 var createScreenSchema = registry.register(
@@ -373,13 +377,17 @@ var createScreenSchema = registry.register(
       description: "Nome de identifica\xE7\xE3o da tela",
       example: "Tela Recep\xE7\xE3o Principal"
     }),
-    ip: ipv4Schema.openapi({
+    ip: ipv4Schema.optional().openapi({
       description: "Endere\xE7o IP do dispositivo na rede",
       example: "192.168.1.50"
     }),
     buildingId: z.string().uuid().openapi({
       description: "ID do pr\xE9dio onde a tela est\xE1 instalada",
       example: "d3b07384-d113-49cd-a5d6-80d00d542fba"
+    }),
+    isPaired: z.boolean().default(false).openapi({
+      description: "Indica se a tela est\xE1 pareada com o servidor",
+      example: true
     })
   })
 );
@@ -389,7 +397,12 @@ var updateScreenSchema = registry.register(
     name: z.string().min(2).max(120).trim().optional(),
     ip: ipv4Schema.optional(),
     buildingId: z.string().uuid().optional(),
-    status: z.nativeEnum(ScreenStatus).optional()
+    isPaired: z.boolean().optional(),
+    status: z.nativeEnum(ScreenStatus).optional(),
+    pin: z.string().length(6).optional().openapi({
+      description: "PIN de pareamento da tela",
+      example: "A1B2C3"
+    })
   }).refine((data) => Object.keys(data).length > 0, {
     message: "Pelo menos um campo deve ser fornecido para atualiza\xE7\xE3o."
   })
@@ -402,6 +415,7 @@ var screenResponseSchema = registry.register(
     ip: z.string(),
     status: z.nativeEnum(ScreenStatus),
     buildingId: z.string().uuid(),
+    isPaired: z.boolean(),
     building: buildingResponseSchema.optional(),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date()
@@ -468,8 +482,32 @@ var baseContentSchema = z.object({
   mediaUrl: z.string().url().optional().openapi({
     description: "URL da m\xEDdia principal (imagem, v\xEDdeo ou p\xE1gina web)"
   }),
-  textBody: z.string().optional().openapi({
+  textBody: z.string().openapi({
     description: "Corpo de texto caso seja um aviso escrito"
+  }),
+  showTitle: z.boolean().default(true).openapi({
+    description: "Indica se o t\xEDtulo deve ser exibido"
+  }),
+  showAuthor: z.boolean().default(true).openapi({
+    description: "Indica se o autor deve ser exibido"
+  }),
+  showQrCode: z.boolean().default(true).openapi({
+    description: "Indica se o QR Code deve ser exibido"
+  }),
+  showTime: z.boolean().default(true).openapi({
+    description: "Indica se a hora deve ser exibida"
+  }),
+  showScreenName: z.boolean().default(true).openapi({
+    description: "Indica se o nome da tela deve ser exibido"
+  }),
+  showTypeBadge: z.boolean().default(true).openapi({
+    description: "Indica se o badge do tipo de conte\xFAdo deve ser exibido"
+  }),
+  showDeadline: z.boolean().default(true).openapi({
+    description: "Indica se o prazo de exibi\xE7\xE3o deve ser exibido"
+  }),
+  isCarousel: z.boolean().default(false).openapi({
+    description: "Indica se o conte\xFAdo faz parte de um carrossel"
   })
 });
 var createContentSchema = registry.register(
@@ -519,6 +557,14 @@ var contentResponseSchema = registry.register(
     textBody: z.string().nullable(),
     ownerId: z.string().uuid(),
     owner: userResponseSchema.optional(),
+    showTitle: z.boolean(),
+    showAuthor: z.boolean(),
+    showQrCode: z.boolean(),
+    showTime: z.boolean(),
+    showScreenName: z.boolean(),
+    showTypeBadge: z.boolean(),
+    showDeadline: z.boolean(),
+    isCarousel: z.boolean(),
     createdAt: z.date(),
     updatedAt: z.date()
   })
@@ -563,7 +609,8 @@ import "zod";
 var createPlaylistItemSchema = registry.register(
   "CreatePlaylistItemRequest",
   z.object({
-    buildingId: z.string().uuid(),
+    buildingId: z.string().uuid().optional(),
+    screenId: z.string().uuid().optional(),
     contentId: z.string().uuid(),
     duration: z.number().int().min(1).default(10).openapi({
       description: "Dura\xE7\xE3o de exibi\xE7\xE3o em segundos",
@@ -573,6 +620,8 @@ var createPlaylistItemSchema = registry.register(
       description: "Ordem de exibi\xE7\xE3o na playlist",
       example: 1
     })
+  }).refine((data) => data.buildingId || data.screenId, {
+    message: "\xC9 necess\xE1rio fornecer um buildingId ou um screenId."
   })
 );
 var updatePlaylistItemSchema = registry.register(
@@ -587,20 +636,24 @@ var updatePlaylistItemSchema = registry.register(
 var reorderPlaylistSchema = registry.register(
   "ReorderPlaylistRequest",
   z.object({
-    buildingId: z.string().uuid(),
+    buildingId: z.string().uuid().optional(),
+    screenId: z.string().uuid().optional(),
     items: z.array(
       z.object({
         id: z.string().uuid(),
         order: z.number().int()
       })
     )
+  }).refine((data) => data.buildingId || data.screenId, {
+    message: "\xC9 necess\xE1rio fornecer um buildingId ou um screenId."
   })
 );
 var playlistItemResponseSchema = registry.register(
   "PlaylistItemResponse",
   z.object({
     id: z.string().uuid(),
-    buildingId: z.string().uuid(),
+    buildingId: z.string().uuid().nullable().optional(),
+    screenId: z.string().uuid().nullable().optional(),
     contentId: z.string().uuid(),
     duration: z.number().int(),
     order: z.number().int(),
@@ -614,9 +667,12 @@ var playlistItemIdSchema = z.object({
     param: { name: "id", in: "path" }
   })
 });
-var playlistBuildingQuerySchema = z.object({
-  buildingId: z.string().uuid({ message: "UUID do pr\xE9dio inv\xE1lido." }).openapi({
-    param: { name: "buildingId", in: "path" }
+var playlistQuerySchema = z.object({
+  buildingId: z.string().uuid({ message: "UUID do pr\xE9dio inv\xE1lido." }).optional().openapi({
+    param: { name: "buildingId", in: "query" }
+  }),
+  screenId: z.string().uuid({ message: "UUID da tela inv\xE1lido." }).optional().openapi({
+    param: { name: "screenId", in: "query" }
   })
 });
 
@@ -663,6 +719,7 @@ export {
   ContentStatus,
   ContentType,
   OpenApiGeneratorV3,
+  PairingRequestStatus,
   ScreenStatus,
   SystemStatus,
   UserRole,
@@ -690,9 +747,9 @@ export {
   minutesToDecimalHours,
   paginationMetaSchema,
   paginationSchema,
-  playlistBuildingQuerySchema,
   playlistItemIdSchema,
   playlistItemResponseSchema,
+  playlistQuerySchema,
   refreshTokenSchema,
   registry,
   reorderPlaylistSchema,
