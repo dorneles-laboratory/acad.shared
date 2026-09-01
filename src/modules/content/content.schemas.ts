@@ -33,8 +33,32 @@ const baseContentSchema = z.object({
   mediaUrl: z.string().url().optional().openapi({
     description: 'URL da mídia principal (imagem, vídeo ou página web)',
   }),
-  textBody: z.string().optional().openapi({
+  textBody: z.string().openapi({
     description: 'Corpo de texto caso seja um aviso escrito',
+  }),
+  showTitle: z.boolean().default(true).openapi({
+    description: 'Indica se o título deve ser exibido',
+  }),
+  showAuthor: z.boolean().default(true).openapi({
+    description: 'Indica se o autor deve ser exibido',
+  }),
+  showQrCode: z.boolean().default(true).openapi({
+    description: 'Indica se o QR Code deve ser exibido',
+  }),
+  showTime: z.boolean().default(true).openapi({
+    description: 'Indica se a hora deve ser exibida',
+  }),
+  showScreenName: z.boolean().default(true).openapi({
+    description: 'Indica se o nome da tela deve ser exibido',
+  }),
+  showTypeBadge: z.boolean().default(true).openapi({
+    description: 'Indica se o badge do tipo de conteúdo deve ser exibido',
+  }),
+  showDeadline: z.boolean().default(true).openapi({
+    description: 'Indica se o prazo de exibição deve ser exibido',
+  }),
+  isCarousel: z.boolean().default(false).openapi({
+    description: 'Indica se o conteúdo faz parte de um carrossel',
   }),
 });
 
@@ -90,6 +114,14 @@ export const contentResponseSchema = registry.register(
     textBody: z.string().nullable(),
     ownerId: z.string().uuid(),
     owner: userResponseSchema.optional(),
+    showTitle: z.boolean(),
+    showAuthor: z.boolean(),
+    showQrCode: z.boolean(),
+    showTime: z.boolean(),
+    showScreenName: z.boolean(),
+    showTypeBadge: z.boolean(),
+    showDeadline: z.boolean(),
+    isCarousel: z.boolean(),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),
