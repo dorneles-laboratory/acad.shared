@@ -1,6 +1,6 @@
 import { z, registry } from '../../lib/registry';
 import { userResponseSchema } from '../users';
-import { ContentType, ContentStatus } from './content.enums';
+import { ContentType, ContentStatus, MediaFit } from './content.enums';
 
 const baseContentSchema = z.object({
   title: z.string().min(2).max(120).trim().openapi({
@@ -63,6 +63,10 @@ const baseContentSchema = z.object({
   isPrivate: z.boolean().default(false).openapi({
     description:
       'Indica se o conteúdo é privado (apenas administradores podem visualizar e editar)',
+  }),
+  mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover).openapi({
+    description: 'Modo de ajuste da mídia na tela (COVER, CONTAIN, FILL, BLUR)',
+    example: MediaFit.Cover,
   }),
 });
 
@@ -137,6 +141,7 @@ export const contentResponseSchema = registry.register(
     showDeadline: z.boolean(),
     isCarousel: z.boolean(),
     isPrivate: z.boolean(),
+    mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),

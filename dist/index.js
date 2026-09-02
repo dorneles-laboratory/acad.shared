@@ -456,6 +456,12 @@ var ContentStatus = {
   Expired: "EXPIRED",
   Archived: "ARCHIVED"
 };
+var MediaFit = {
+  Cover: "COVER",
+  Contain: "CONTAIN",
+  Fill: "FILL",
+  Blur: "BLUR"
+};
 
 // src/modules/content/content.schemas.ts
 var baseContentSchema = z.object({
@@ -518,6 +524,10 @@ var baseContentSchema = z.object({
   }),
   isPrivate: z.boolean().default(false).openapi({
     description: "Indica se o conte\xFAdo \xE9 privado (apenas administradores podem visualizar e editar)"
+  }),
+  mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover).openapi({
+    description: "Modo de ajuste da m\xEDdia na tela (COVER, CONTAIN, FILL, BLUR)",
+    example: MediaFit.Cover
   })
 });
 var createContentSchema = registry.register(
@@ -585,6 +595,7 @@ var contentResponseSchema = registry.register(
     showDeadline: z.boolean(),
     isCarousel: z.boolean(),
     isPrivate: z.boolean(),
+    mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover),
     createdAt: z.date(),
     updatedAt: z.date()
   })
@@ -748,7 +759,10 @@ var dashboardStatsSchema = registry.register(
   z.object({
     totalContents: z.number().openapi({ description: "Total de conte\xFAdos cadastrados", example: 42 }),
     activeContents: z.number().openapi({ description: "Conte\xFAdos em exibi\xE7\xE3o ativa", example: 12 }),
-    pendingContents: z.number().openapi({ description: "Conte\xFAdos agendados ou em rascunho", example: 5 }),
+    pendingContents: z.number().openapi({
+      description: "Conte\xFAdos agendados ou em rascunho",
+      example: 5
+    }),
     contentsByStatus: z.record(z.string(), z.number()),
     contentsByType: z.record(z.string(), z.number()),
     totalScreens: z.number().openapi({ description: "Total de telas cadastradas", example: 15 }),
@@ -786,6 +800,7 @@ export {
   AuthEnums,
   ContentStatus,
   ContentType,
+  MediaFit,
   OpenApiGeneratorV3,
   PairingRequestStatus,
   ScreenStatus,

@@ -369,6 +369,12 @@ declare const createContentSchema: z.ZodObject<{
     showDeadline: z.ZodDefault<z.ZodBoolean>;
     isCarousel: z.ZodDefault<z.ZodBoolean>;
     isPrivate: z.ZodDefault<z.ZodBoolean>;
+    mediaFit: z.ZodDefault<z.ZodEnum<{
+        readonly Cover: "COVER";
+        readonly Contain: "CONTAIN";
+        readonly Fill: "FILL";
+        readonly Blur: "BLUR";
+    }>>;
 }, z.core.$strip>;
 declare const updateContentSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -400,6 +406,12 @@ declare const updateContentSchema: z.ZodObject<{
     showDeadline: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     isCarousel: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     isPrivate: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
+    mediaFit: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        readonly Cover: "COVER";
+        readonly Contain: "CONTAIN";
+        readonly Fill: "FILL";
+        readonly Blur: "BLUR";
+    }>>>;
 }, z.core.$strip>;
 declare const updateContentStatusSchema: z.ZodObject<{
     status: z.ZodEnum<{
@@ -482,6 +494,12 @@ declare const contentResponseSchema: z.ZodObject<{
     showDeadline: z.ZodBoolean;
     isCarousel: z.ZodBoolean;
     isPrivate: z.ZodBoolean;
+    mediaFit: z.ZodDefault<z.ZodEnum<{
+        readonly Cover: "COVER";
+        readonly Contain: "CONTAIN";
+        readonly Fill: "FILL";
+        readonly Blur: "BLUR";
+    }>>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
@@ -524,6 +542,13 @@ declare const ContentStatus: {
     readonly Archived: "ARCHIVED";
 };
 type EnumContentStatus = (typeof ContentStatus)[keyof typeof ContentStatus];
+declare const MediaFit: {
+    readonly Cover: "COVER";
+    readonly Contain: "CONTAIN";
+    readonly Fill: "FILL";
+    readonly Blur: "BLUR";
+};
+type EnumMediaFit = (typeof MediaFit)[keyof typeof MediaFit];
 
 type CreateContentDTO = z.infer<typeof createContentSchema>;
 type UpdateContentDTO = z.infer<typeof updateContentSchema>;
@@ -637,6 +662,12 @@ declare const playlistItemResponseSchema: z.ZodObject<{
         showDeadline: z.ZodBoolean;
         isCarousel: z.ZodBoolean;
         isPrivate: z.ZodBoolean;
+        mediaFit: z.ZodDefault<z.ZodEnum<{
+            readonly Cover: "COVER";
+            readonly Contain: "CONTAIN";
+            readonly Fill: "FILL";
+            readonly Blur: "BLUR";
+        }>>;
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, z.core.$strip>>;
@@ -732,6 +763,12 @@ declare const kioskPlaylistItemResponseSchema: z.ZodObject<{
         showDeadline: z.ZodBoolean;
         isCarousel: z.ZodBoolean;
         isPrivate: z.ZodBoolean;
+        mediaFit: z.ZodDefault<z.ZodEnum<{
+            readonly Cover: "COVER";
+            readonly Contain: "CONTAIN";
+            readonly Fill: "FILL";
+            readonly Blur: "BLUR";
+        }>>;
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, z.core.$strip>;
@@ -815,6 +852,12 @@ declare const kioskPlaylistResponseSchema: z.ZodObject<{
             showDeadline: z.ZodBoolean;
             isCarousel: z.ZodBoolean;
             isPrivate: z.ZodBoolean;
+            mediaFit: z.ZodDefault<z.ZodEnum<{
+                readonly Cover: "COVER";
+                readonly Contain: "CONTAIN";
+                readonly Fill: "FILL";
+                readonly Blur: "BLUR";
+            }>>;
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, z.core.$strip>;
@@ -896,4 +939,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreatePlaylistItemDTO, type CreateScreenDTO, type CreateUserDTO, type DashboardCenterInfraDTO, type DashboardRecentActivityDTO, type DashboardStatsDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumPairingRequestStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type KioskPlaylistItemDTO, type KioskPlaylistResponseDTO, type LoginAuthDTO, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, PairingRequestStatus, type PlaylistItemResponseDTO, type ProblemDetailsDTO, type ReorderPlaylistDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateContentStatusDTO, type UpdatePlaylistItemDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createPlaylistItemSchema, createScreenSchema, createUserSchema, dashboardCenterInfraSchema, dashboardRecentActivitySchema, dashboardStatsSchema, formatMinutesToReadable, ipv4Schema, kioskPlaylistItemResponseSchema, kioskPlaylistResponseSchema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, playlistItemIdSchema, playlistItemResponseSchema, playlistQuerySchema, refreshTokenSchema, registry, reorderPlaylistSchema, rfc7807ErrorSchema, screenIdSchema, screenIpSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateContentStatusSchema, updatePlaylistItemSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreatePlaylistItemDTO, type CreateScreenDTO, type CreateUserDTO, type DashboardCenterInfraDTO, type DashboardRecentActivityDTO, type DashboardStatsDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumMediaFit, type EnumPairingRequestStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type KioskPlaylistItemDTO, type KioskPlaylistResponseDTO, type LoginAuthDTO, MediaFit, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, PairingRequestStatus, type PlaylistItemResponseDTO, type ProblemDetailsDTO, type ReorderPlaylistDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateContentStatusDTO, type UpdatePlaylistItemDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createPlaylistItemSchema, createScreenSchema, createUserSchema, dashboardCenterInfraSchema, dashboardRecentActivitySchema, dashboardStatsSchema, formatMinutesToReadable, ipv4Schema, kioskPlaylistItemResponseSchema, kioskPlaylistResponseSchema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, playlistItemIdSchema, playlistItemResponseSchema, playlistQuerySchema, refreshTokenSchema, registry, reorderPlaylistSchema, rfc7807ErrorSchema, screenIdSchema, screenIpSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateContentStatusSchema, updatePlaylistItemSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };

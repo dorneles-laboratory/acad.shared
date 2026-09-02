@@ -17,3 +17,12 @@ export const ContentStatus = {
 
 export type EnumContentStatus =
   (typeof ContentStatus)[keyof typeof ContentStatus];
+
+export const MediaFit = {
+  Cover: 'COVER',
+  Contain: 'CONTAIN',
+  Fill: 'FILL',
+  Blur: 'BLUR',
+} as const;
+
+export type EnumMediaFit = (typeof MediaFit)[keyof typeof MediaFit];
