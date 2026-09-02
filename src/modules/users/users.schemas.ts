@@ -71,7 +71,7 @@ export const updateUserSchema = registry.register(
     .object({
       name: z
         .string({
-          error: ({ input }) => 'O nome deve ser um texto.',
+          error: () => 'O nome deve ser um texto.',
         })
         .min(2, { message: 'Nome muito curto.' })
         .max(120, { message: 'Nome muito longo.' })

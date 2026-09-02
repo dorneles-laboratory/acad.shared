@@ -17,8 +17,8 @@
 </div>
 
 <h1 align="center">
-    
-  Shared - Biblioteca de Tipos e Contratos Compartilhados
+
+Shared - Biblioteca de Tipos e Contratos Compartilhados
 </h1>
 
 <p align="center">
