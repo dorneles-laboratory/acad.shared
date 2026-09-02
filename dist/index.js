@@ -370,6 +370,7 @@ var PairingRequestStatus = {
 };
 
 // src/modules/screens/screens.schemas.ts
+var screenIpSchema = z.union([ipv4Schema, z.literal(""), z.null()]).optional().nullable();
 var createScreenSchema = registry.register(
   "CreateScreenRequest",
   z.object({
@@ -377,7 +378,7 @@ var createScreenSchema = registry.register(
       description: "Nome de identifica\xE7\xE3o da tela",
       example: "Tela Recep\xE7\xE3o Principal"
     }),
-    ip: ipv4Schema.optional().openapi({
+    ip: screenIpSchema.openapi({
       description: "Endere\xE7o IP do dispositivo na rede",
       example: "192.168.1.50"
     }),
@@ -388,6 +389,10 @@ var createScreenSchema = registry.register(
     isPaired: z.boolean().default(false).openapi({
       description: "Indica se a tela est\xE1 pareada com o servidor",
       example: true
+    }),
+    isPrivate: z.boolean().default(false).openapi({
+      description: "Indica se a tela \xE9 restrita apenas a administradores",
+      example: false
     })
   })
 );
@@ -395,9 +400,10 @@ var updateScreenSchema = registry.register(
   "UpdateScreenRequest",
   z.object({
     name: z.string().min(2).max(120).trim().optional(),
-    ip: ipv4Schema.optional(),
+    ip: screenIpSchema,
     buildingId: z.string().uuid().optional(),
     isPaired: z.boolean().optional(),
+    isPrivate: z.boolean().optional(),
     status: z.nativeEnum(ScreenStatus).optional(),
     pin: z.string().length(6).optional().openapi({
       description: "PIN de pareamento da tela",
@@ -412,10 +418,11 @@ var screenResponseSchema = registry.register(
   z.object({
     id: z.string().uuid(),
     name: z.string(),
-    ip: z.string(),
+    ip: z.string().nullable().optional(),
     status: z.nativeEnum(ScreenStatus),
     buildingId: z.string().uuid(),
     isPaired: z.boolean(),
+    isPrivate: z.boolean(),
     building: buildingResponseSchema.optional(),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date()
@@ -448,6 +455,12 @@ var ContentStatus = {
   Active: "ACTIVE",
   Expired: "EXPIRED",
   Archived: "ARCHIVED"
+};
+var MediaFit = {
+  Cover: "COVER",
+  Contain: "CONTAIN",
+  Fill: "FILL",
+  Blur: "BLUR"
 };
 
 // src/modules/content/content.schemas.ts
@@ -508,6 +521,13 @@ var baseContentSchema = z.object({
   }),
   isCarousel: z.boolean().default(false).openapi({
     description: "Indica se o conte\xFAdo faz parte de um carrossel"
+  }),
+  isPrivate: z.boolean().default(false).openapi({
+    description: "Indica se o conte\xFAdo \xE9 privado (apenas administradores podem visualizar e editar)"
+  }),
+  mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover).openapi({
+    description: "Modo de ajuste da m\xEDdia na tela (COVER, CONTAIN, FILL, BLUR)",
+    example: MediaFit.Cover
   })
 });
 var createContentSchema = registry.register(
@@ -542,6 +562,15 @@ var updateContentSchema = registry.register(
     }
   )
 );
+var updateContentStatusSchema = registry.register(
+  "UpdateContentStatusRequest",
+  z.object({
+    status: z.nativeEnum(ContentStatus).openapi({
+      description: "Novo status do conte\xFAdo",
+      example: ContentStatus.Active
+    })
+  })
+);
 var contentResponseSchema = registry.register(
   "ContentResponse",
   z.object({
@@ -565,6 +594,8 @@ var contentResponseSchema = registry.register(
     showTypeBadge: z.boolean(),
     showDeadline: z.boolean(),
     isCarousel: z.boolean(),
+    isPrivate: z.boolean(),
+    mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover),
     createdAt: z.date(),
     updatedAt: z.date()
   })
@@ -705,6 +736,50 @@ var kioskPlaylistResponseSchema = registry.register(
   })
 );
 
+// src/modules/dashboard/dashboard.schemas.ts
+var dashboardCenterInfraSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  acronym: z.string().nullable(),
+  color: z.string().nullable(),
+  buildingsCount: z.number(),
+  screensCount: z.number().optional()
+});
+var dashboardRecentActivitySchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  type: z.string(),
+  status: z.string(),
+  author: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+});
+var dashboardStatsSchema = registry.register(
+  "DashboardStatsResponse",
+  z.object({
+    totalContents: z.number().openapi({ description: "Total de conte\xFAdos cadastrados", example: 42 }),
+    activeContents: z.number().openapi({ description: "Conte\xFAdos em exibi\xE7\xE3o ativa", example: 12 }),
+    pendingContents: z.number().openapi({
+      description: "Conte\xFAdos agendados ou em rascunho",
+      example: 5
+    }),
+    contentsByStatus: z.record(z.string(), z.number()),
+    contentsByType: z.record(z.string(), z.number()),
+    totalScreens: z.number().openapi({ description: "Total de telas cadastradas", example: 15 }),
+    onlineScreens: z.number().openapi({ description: "Telas conectadas online", example: 10 }),
+    offlineScreens: z.number().openapi({ description: "Telas desconectadas offline", example: 5 }),
+    screensByStatus: z.record(z.string(), z.number()),
+    totalCenters: z.number().openapi({ description: "Total de centros acad\xEAmicos", example: 4 }),
+    totalBuildings: z.number().openapi({ description: "Total de pr\xE9dios mapeados", example: 18 }),
+    totalUsers: z.number().openapi({ description: "Total de usu\xE1rios", example: 8 }),
+    centersInfrastructure: z.array(dashboardCenterInfraSchema),
+    recentActivities: z.array(dashboardRecentActivitySchema)
+  })
+);
+
+// src/modules/dashboard/dashboard.types.ts
+import "zod";
+
 // src/utils/date-time.ts
 function timeStringToMinutes(timeString) {
   const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]$/;
@@ -725,6 +800,7 @@ export {
   AuthEnums,
   ContentStatus,
   ContentType,
+  MediaFit,
   OpenApiGeneratorV3,
   PairingRequestStatus,
   ScreenStatus,
@@ -746,6 +822,9 @@ export {
   createPlaylistItemSchema,
   createScreenSchema,
   createUserSchema,
+  dashboardCenterInfraSchema,
+  dashboardRecentActivitySchema,
+  dashboardStatsSchema,
   formatMinutesToReadable,
   ipv4Schema,
   kioskPlaylistItemResponseSchema,
@@ -762,12 +841,14 @@ export {
   reorderPlaylistSchema,
   rfc7807ErrorSchema,
   screenIdSchema,
+  screenIpSchema,
   screenQuerySchema,
   screenResponseSchema,
   timeStringToMinutes,
   updateBuildingSchema,
   updateCenterSchema,
   updateContentSchema,
+  updateContentStatusSchema,
   updatePlaylistItemSchema,
   updateScreenSchema,
   updateUserSchema,

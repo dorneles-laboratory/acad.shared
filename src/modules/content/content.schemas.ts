@@ -1,6 +1,6 @@
 import { z, registry } from '../../lib/registry';
 import { userResponseSchema } from '../users';
-import { ContentType, ContentStatus } from './content.enums';
+import { ContentType, ContentStatus, MediaFit } from './content.enums';
 
 const baseContentSchema = z.object({
   title: z.string().min(2).max(120).trim().openapi({
@@ -60,6 +60,14 @@ const baseContentSchema = z.object({
   isCarousel: z.boolean().default(false).openapi({
     description: 'Indica se o conteúdo faz parte de um carrossel',
   }),
+  isPrivate: z.boolean().default(false).openapi({
+    description:
+      'Indica se o conteúdo é privado (apenas administradores podem visualizar e editar)',
+  }),
+  mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover).openapi({
+    description: 'Modo de ajuste da mídia na tela (COVER, CONTAIN, FILL, BLUR)',
+    example: MediaFit.Cover,
+  }),
 });
 
 export const createContentSchema = registry.register(
@@ -99,6 +107,16 @@ export const updateContentSchema = registry.register(
     ),
 );
 
+export const updateContentStatusSchema = registry.register(
+  'UpdateContentStatusRequest',
+  z.object({
+    status: z.nativeEnum(ContentStatus).openapi({
+      description: 'Novo status do conteúdo',
+      example: ContentStatus.Active,
+    }),
+  }),
+);
+
 export const contentResponseSchema = registry.register(
   'ContentResponse',
   z.object({
@@ -122,6 +140,8 @@ export const contentResponseSchema = registry.register(
     showTypeBadge: z.boolean(),
     showDeadline: z.boolean(),
     isCarousel: z.boolean(),
+    isPrivate: z.boolean(),
+    mediaFit: z.nativeEnum(MediaFit).default(MediaFit.Cover),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),

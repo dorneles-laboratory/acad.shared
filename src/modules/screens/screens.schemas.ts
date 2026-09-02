@@ -3,6 +3,11 @@ import { z, registry } from '../../lib/registry';
 import { buildingResponseSchema } from '../buildings';
 import { ScreenStatus } from './screens.enums';
 
+export const screenIpSchema = z
+  .union([ipv4Schema, z.literal(''), z.null()])
+  .optional()
+  .nullable();
+
 export const createScreenSchema = registry.register(
   'CreateScreenRequest',
   z.object({
@@ -10,7 +15,7 @@ export const createScreenSchema = registry.register(
       description: 'Nome de identificação da tela',
       example: 'Tela Recepção Principal',
     }),
-    ip: ipv4Schema.optional().openapi({
+    ip: screenIpSchema.openapi({
       description: 'Endereço IP do dispositivo na rede',
       example: '192.168.1.50',
     }),
@@ -22,6 +27,10 @@ export const createScreenSchema = registry.register(
       description: 'Indica se a tela está pareada com o servidor',
       example: true,
     }),
+    isPrivate: z.boolean().default(false).openapi({
+      description: 'Indica se a tela é restrita apenas a administradores',
+      example: false,
+    }),
   }),
 );
 
@@ -30,9 +39,10 @@ export const updateScreenSchema = registry.register(
   z
     .object({
       name: z.string().min(2).max(120).trim().optional(),
-      ip: ipv4Schema.optional(),
+      ip: screenIpSchema,
       buildingId: z.string().uuid().optional(),
       isPaired: z.boolean().optional(),
+      isPrivate: z.boolean().optional(),
       status: z.nativeEnum(ScreenStatus).optional(),
       pin: z.string().length(6).optional().openapi({
         description: 'PIN de pareamento da tela',
@@ -49,10 +59,11 @@ export const screenResponseSchema = registry.register(
   z.object({
     id: z.string().uuid(),
     name: z.string(),
-    ip: z.string(),
+    ip: z.string().nullable().optional(),
     status: z.nativeEnum(ScreenStatus),
     buildingId: z.string().uuid(),
     isPaired: z.boolean(),
+    isPrivate: z.boolean(),
     building: buildingResponseSchema.optional(),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
