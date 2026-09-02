@@ -16,9 +16,11 @@
     "dev": "tsc --watch",
     "test-watch": "vitest --watch",
     "lint": "eslint .",
+    "lint-check": "eslint .",
     "lint-fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format-check": "prettier --check ."
+    "format-check": "prettier --check .",
+    "format-fix": "prettier --write ."
   },
   "keywords": [],
   "author": "Eng. Fernando Dorneles da Silva",
