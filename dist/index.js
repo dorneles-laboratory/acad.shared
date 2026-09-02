@@ -228,7 +228,7 @@ var updateUserSchema = registry.register(
   "UpdateUserRequest",
   z.object({
     name: z.string({
-      error: ({ input }) => "O nome deve ser um texto."
+      error: () => "O nome deve ser um texto."
     }).min(2, { message: "Nome muito curto." }).max(120, { message: "Nome muito longo." }).trim().optional().openapi({
       description: "Nome completo do usu\xE1rio",
       example: "Usu\xE1rio de Teste Atualizado"
@@ -588,6 +588,13 @@ var contentQuerySchema = z.object({
   type: z.nativeEnum(ContentType).optional().openapi({
     description: "Filtra pelo tipo do conte\xFAdo",
     example: ContentType.Image
+  }),
+  // Preprocess intercepta o dado da query string antes da validação
+  onlyMyCenter: z.preprocess((val) => val === "true" || val === true, z.boolean().optional()).openapi({
+    description: "Filtra conte\xFAdos apenas do centro do usu\xE1rio"
+  }),
+  onlyMyContents: z.preprocess((val) => val === "true" || val === true, z.boolean().optional()).openapi({
+    description: "Filtra conte\xFAdos apenas do usu\xE1rio logado"
   })
 });
 

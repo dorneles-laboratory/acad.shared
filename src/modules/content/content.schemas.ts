@@ -151,4 +151,15 @@ export const contentQuerySchema = z.object({
     description: 'Filtra pelo tipo do conteúdo',
     example: ContentType.Image,
   }),
+  // Preprocess intercepta o dado da query string antes da validação
+  onlyMyCenter: z
+    .preprocess((val) => val === 'true' || val === true, z.boolean().optional())
+    .openapi({
+      description: 'Filtra conteúdos apenas do centro do usuário',
+    }),
+  onlyMyContents: z
+    .preprocess((val) => val === 'true' || val === true, z.boolean().optional())
+    .openapi({
+      description: 'Filtra conteúdos apenas do usuário logado',
+    }),
 });

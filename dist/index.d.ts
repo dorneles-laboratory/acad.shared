@@ -489,6 +489,8 @@ declare const contentQuerySchema: z.ZodObject<{
         readonly Notice: "NOTICE";
         readonly WebUrl: "WEB_URL";
     }>>;
+    onlyMyCenter: z.ZodPipe<z.ZodTransform<boolean, unknown>, z.ZodOptional<z.ZodBoolean>>;
+    onlyMyContents: z.ZodPipe<z.ZodTransform<boolean, unknown>, z.ZodOptional<z.ZodBoolean>>;
 }, z.core.$strip>;
 
 type CreateContentDTO = z.infer<typeof createContentSchema>;
