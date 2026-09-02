@@ -60,6 +60,10 @@ const baseContentSchema = z.object({
   isCarousel: z.boolean().default(false).openapi({
     description: 'Indica se o conteúdo faz parte de um carrossel',
   }),
+  isPrivate: z.boolean().default(false).openapi({
+    description:
+      'Indica se o conteúdo é privado (apenas administradores podem visualizar e editar)',
+  }),
 });
 
 export const createContentSchema = registry.register(
@@ -99,6 +103,16 @@ export const updateContentSchema = registry.register(
     ),
 );
 
+export const updateContentStatusSchema = registry.register(
+  'UpdateContentStatusRequest',
+  z.object({
+    status: z.nativeEnum(ContentStatus).openapi({
+      description: 'Novo status do conteúdo',
+      example: ContentStatus.Active,
+    }),
+  }),
+);
+
 export const contentResponseSchema = registry.register(
   'ContentResponse',
   z.object({
@@ -122,6 +136,7 @@ export const contentResponseSchema = registry.register(
     showTypeBadge: z.boolean(),
     showDeadline: z.boolean(),
     isCarousel: z.boolean(),
+    isPrivate: z.boolean(),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),
