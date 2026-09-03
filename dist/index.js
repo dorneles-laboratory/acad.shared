@@ -78,11 +78,11 @@ var createBuildingSchema = registry.register(
     }),
     latitude: z.number().min(-90).max(90).optional().nullable().openapi({
       description: "Latitude geogr\xE1fica do pr\xE9dio (opcional)",
-      example: -29.7139
+      example: -29.7207
     }),
     longitude: z.number().min(-180).max(180).optional().nullable().openapi({
       description: "Longitude geogr\xE1fica do pr\xE9dio (opcional)",
-      example: -53.7165
+      example: -53.7147
     })
   })
 );
