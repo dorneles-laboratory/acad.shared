@@ -75,6 +75,14 @@ var createBuildingSchema = registry.register(
     centerId: z.string().uuid().openapi({
       description: "ID do centro ao qual o pr\xE9dio pertence",
       example: "123e4567-e89b-12d3-a456-426614174000"
+    }),
+    latitude: z.number().min(-90).max(90).optional().nullable().openapi({
+      description: "Latitude geogr\xE1fica do pr\xE9dio (opcional)",
+      example: -29.7139
+    }),
+    longitude: z.number().min(-180).max(180).optional().nullable().openapi({
+      description: "Longitude geogr\xE1fica do pr\xE9dio (opcional)",
+      example: -53.7165
     })
   })
 );
@@ -97,6 +105,8 @@ var buildingResponseSchema = registry.register(
     description: z.string().nullable(),
     status: z.nativeEnum(SystemStatus),
     centerId: z.string().uuid(),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
     createdAt: z.date(),
     updatedAt: z.date()
   })
@@ -743,7 +753,8 @@ var dashboardCenterInfraSchema = z.object({
   acronym: z.string().nullable(),
   color: z.string().nullable(),
   buildingsCount: z.number(),
-  screensCount: z.number().optional()
+  screensCount: z.number().optional(),
+  onlineScreensCount: z.number().optional()
 });
 var dashboardRecentActivitySchema = z.object({
   id: z.string().uuid(),
@@ -774,6 +785,53 @@ var dashboardStatsSchema = registry.register(
     totalUsers: z.number().openapi({ description: "Total de usu\xE1rios", example: 8 }),
     centersInfrastructure: z.array(dashboardCenterInfraSchema),
     recentActivities: z.array(dashboardRecentActivitySchema)
+  })
+);
+var dashboardMapScreenSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  ip: z.string().nullable(),
+  status: z.string(),
+  isPrivate: z.boolean()
+});
+var dashboardMapBuildingSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  centerName: z.string(),
+  centerAcronym: z.string().nullable(),
+  centerColor: z.string().nullable(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  screensCount: z.number(),
+  onlineScreensCount: z.number(),
+  offlineScreensCount: z.number(),
+  coordinates: z.object({
+    ipBased: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+      isFallback: z.boolean()
+    }),
+    buildingBased: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+      isConfigured: z.boolean()
+    })
+  }),
+  screens: z.array(dashboardMapScreenSchema)
+});
+var dashboardMapResponseSchema = registry.register(
+  "DashboardMapResponse",
+  z.object({
+    center: z.object({
+      latitude: z.number(),
+      longitude: z.number()
+    }),
+    bounds: z.object({
+      southwest: z.tuple([z.number(), z.number()]),
+      northeast: z.tuple([z.number(), z.number()])
+    }),
+    buildings: z.array(dashboardMapBuildingSchema)
   })
 );
 
@@ -823,6 +881,9 @@ export {
   createScreenSchema,
   createUserSchema,
   dashboardCenterInfraSchema,
+  dashboardMapBuildingSchema,
+  dashboardMapResponseSchema,
+  dashboardMapScreenSchema,
   dashboardRecentActivitySchema,
   dashboardStatsSchema,
   formatMinutesToReadable,

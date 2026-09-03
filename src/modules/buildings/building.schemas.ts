@@ -16,6 +16,14 @@ export const createBuildingSchema = registry.register(
       description: 'ID do centro ao qual o prédio pertence',
       example: '123e4567-e89b-12d3-a456-426614174000',
     }),
+    latitude: z.number().min(-90).max(90).optional().nullable().openapi({
+      description: 'Latitude geográfica do prédio (opcional)',
+      example: -29.7207,
+    }),
+    longitude: z.number().min(-180).max(180).optional().nullable().openapi({
+      description: 'Longitude geográfica do prédio (opcional)',
+      example: -53.7147,
+    }),
   }),
 );
 
@@ -42,6 +50,8 @@ export const buildingResponseSchema = registry.register(
     description: z.string().nullable(),
     status: z.nativeEnum(SystemStatus),
     centerId: z.string().uuid(),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),

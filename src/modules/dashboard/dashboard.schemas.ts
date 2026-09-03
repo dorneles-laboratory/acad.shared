@@ -7,6 +7,7 @@ export const dashboardCenterInfraSchema = z.object({
   color: z.string().nullable(),
   buildingsCount: z.number(),
   screensCount: z.number().optional(),
+  onlineScreensCount: z.number().optional(),
 });
 
 export const dashboardRecentActivitySchema = z.object({
@@ -55,5 +56,55 @@ export const dashboardStatsSchema = registry.register(
       .openapi({ description: 'Total de usuários', example: 8 }),
     centersInfrastructure: z.array(dashboardCenterInfraSchema),
     recentActivities: z.array(dashboardRecentActivitySchema),
+  }),
+);
+
+export const dashboardMapScreenSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  ip: z.string().nullable(),
+  status: z.string(),
+  isPrivate: z.boolean(),
+});
+
+export const dashboardMapBuildingSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  centerName: z.string(),
+  centerAcronym: z.string().nullable(),
+  centerColor: z.string().nullable(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  screensCount: z.number(),
+  onlineScreensCount: z.number(),
+  offlineScreensCount: z.number(),
+  coordinates: z.object({
+    ipBased: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+      isFallback: z.boolean(),
+    }),
+    buildingBased: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+      isConfigured: z.boolean(),
+    }),
+  }),
+  screens: z.array(dashboardMapScreenSchema),
+});
+
+export const dashboardMapResponseSchema = registry.register(
+  'DashboardMapResponse',
+  z.object({
+    center: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }),
+    bounds: z.object({
+      southwest: z.tuple([z.number(), z.number()]),
+      northeast: z.tuple([z.number(), z.number()]),
+    }),
+    buildings: z.array(dashboardMapBuildingSchema),
   }),
 );

@@ -85,6 +85,8 @@ declare const userResponseSchema: z.ZodObject<{
                 readonly Inactive: "INACTIVE";
             }>;
             centerId: z.ZodString;
+            latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, z.core.$strip>>>;
@@ -153,11 +155,15 @@ declare const createBuildingSchema: z.ZodObject<{
     name: z.ZodString;
     description: z.ZodOptional<z.ZodString>;
     centerId: z.ZodString;
+    latitude: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
+    longitude: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
 }, z.core.$strip>;
 declare const updateBuildingSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
     description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     centerId: z.ZodOptional<z.ZodString>;
+    latitude: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
+    longitude: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     status: z.ZodOptional<z.ZodEnum<{
         readonly Active: "ACTIVE";
         readonly Inactive: "INACTIVE";
@@ -172,6 +178,8 @@ declare const buildingResponseSchema: z.ZodObject<{
         readonly Inactive: "INACTIVE";
     }>;
     centerId: z.ZodString;
+    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, z.core.$strip>;
@@ -228,6 +236,8 @@ declare const centerResponseSchema: z.ZodObject<{
             readonly Inactive: "INACTIVE";
         }>;
         centerId: z.ZodString;
+        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, z.core.$strip>>>;
@@ -298,6 +308,8 @@ declare const screenResponseSchema: z.ZodObject<{
             readonly Inactive: "INACTIVE";
         }>;
         centerId: z.ZodString;
+        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, z.core.$strip>>;
@@ -475,6 +487,8 @@ declare const contentResponseSchema: z.ZodObject<{
                     readonly Inactive: "INACTIVE";
                 }>;
                 centerId: z.ZodString;
+                latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, z.core.$strip>>>;
@@ -643,6 +657,8 @@ declare const playlistItemResponseSchema: z.ZodObject<{
                         readonly Inactive: "INACTIVE";
                     }>;
                     centerId: z.ZodString;
+                    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, z.core.$strip>>>;
@@ -744,6 +760,8 @@ declare const kioskPlaylistItemResponseSchema: z.ZodObject<{
                         readonly Inactive: "INACTIVE";
                     }>;
                     centerId: z.ZodString;
+                    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, z.core.$strip>>>;
@@ -833,6 +851,8 @@ declare const kioskPlaylistResponseSchema: z.ZodObject<{
                             readonly Inactive: "INACTIVE";
                         }>;
                         centerId: z.ZodString;
+                        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
                         createdAt: z.ZodDate;
                         updatedAt: z.ZodDate;
                     }, z.core.$strip>>>;
@@ -874,6 +894,7 @@ declare const dashboardCenterInfraSchema: z.ZodObject<{
     color: z.ZodNullable<z.ZodString>;
     buildingsCount: z.ZodNumber;
     screensCount: z.ZodOptional<z.ZodNumber>;
+    onlineScreensCount: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strip>;
 declare const dashboardRecentActivitySchema: z.ZodObject<{
     id: z.ZodString;
@@ -904,6 +925,7 @@ declare const dashboardStatsSchema: z.ZodObject<{
         color: z.ZodNullable<z.ZodString>;
         buildingsCount: z.ZodNumber;
         screensCount: z.ZodOptional<z.ZodNumber>;
+        onlineScreensCount: z.ZodOptional<z.ZodNumber>;
     }, z.core.$strip>>;
     recentActivities: z.ZodArray<z.ZodObject<{
         id: z.ZodString;
@@ -915,10 +937,94 @@ declare const dashboardStatsSchema: z.ZodObject<{
         updatedAt: z.ZodDate;
     }, z.core.$strip>>;
 }, z.core.$strip>;
+declare const dashboardMapScreenSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    ip: z.ZodNullable<z.ZodString>;
+    status: z.ZodString;
+    isPrivate: z.ZodBoolean;
+}, z.core.$strip>;
+declare const dashboardMapBuildingSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    description: z.ZodNullable<z.ZodString>;
+    centerName: z.ZodString;
+    centerAcronym: z.ZodNullable<z.ZodString>;
+    centerColor: z.ZodNullable<z.ZodString>;
+    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    screensCount: z.ZodNumber;
+    onlineScreensCount: z.ZodNumber;
+    offlineScreensCount: z.ZodNumber;
+    coordinates: z.ZodObject<{
+        ipBased: z.ZodObject<{
+            latitude: z.ZodNumber;
+            longitude: z.ZodNumber;
+            isFallback: z.ZodBoolean;
+        }, z.core.$strip>;
+        buildingBased: z.ZodObject<{
+            latitude: z.ZodNumber;
+            longitude: z.ZodNumber;
+            isConfigured: z.ZodBoolean;
+        }, z.core.$strip>;
+    }, z.core.$strip>;
+    screens: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        ip: z.ZodNullable<z.ZodString>;
+        status: z.ZodString;
+        isPrivate: z.ZodBoolean;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
+declare const dashboardMapResponseSchema: z.ZodObject<{
+    center: z.ZodObject<{
+        latitude: z.ZodNumber;
+        longitude: z.ZodNumber;
+    }, z.core.$strip>;
+    bounds: z.ZodObject<{
+        southwest: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
+        northeast: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
+    }, z.core.$strip>;
+    buildings: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        name: z.ZodString;
+        description: z.ZodNullable<z.ZodString>;
+        centerName: z.ZodString;
+        centerAcronym: z.ZodNullable<z.ZodString>;
+        centerColor: z.ZodNullable<z.ZodString>;
+        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        screensCount: z.ZodNumber;
+        onlineScreensCount: z.ZodNumber;
+        offlineScreensCount: z.ZodNumber;
+        coordinates: z.ZodObject<{
+            ipBased: z.ZodObject<{
+                latitude: z.ZodNumber;
+                longitude: z.ZodNumber;
+                isFallback: z.ZodBoolean;
+            }, z.core.$strip>;
+            buildingBased: z.ZodObject<{
+                latitude: z.ZodNumber;
+                longitude: z.ZodNumber;
+                isConfigured: z.ZodBoolean;
+            }, z.core.$strip>;
+        }, z.core.$strip>;
+        screens: z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            name: z.ZodString;
+            ip: z.ZodNullable<z.ZodString>;
+            status: z.ZodString;
+            isPrivate: z.ZodBoolean;
+        }, z.core.$strip>>;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
 
 type DashboardCenterInfraDTO = z.infer<typeof dashboardCenterInfraSchema>;
 type DashboardRecentActivityDTO = z.infer<typeof dashboardRecentActivitySchema>;
 type DashboardStatsDTO = z.infer<typeof dashboardStatsSchema>;
+type DashboardMapScreenDTO = z.infer<typeof dashboardMapScreenSchema>;
+type DashboardMapBuildingDTO = z.infer<typeof dashboardMapBuildingSchema>;
+type DashboardMapResponseDTO = z.infer<typeof dashboardMapResponseSchema>;
 
 declare const SystemStatus: {
     readonly Active: "ACTIVE";
@@ -939,4 +1045,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreatePlaylistItemDTO, type CreateScreenDTO, type CreateUserDTO, type DashboardCenterInfraDTO, type DashboardRecentActivityDTO, type DashboardStatsDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumMediaFit, type EnumPairingRequestStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type KioskPlaylistItemDTO, type KioskPlaylistResponseDTO, type LoginAuthDTO, MediaFit, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, PairingRequestStatus, type PlaylistItemResponseDTO, type ProblemDetailsDTO, type ReorderPlaylistDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateContentStatusDTO, type UpdatePlaylistItemDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createPlaylistItemSchema, createScreenSchema, createUserSchema, dashboardCenterInfraSchema, dashboardRecentActivitySchema, dashboardStatsSchema, formatMinutesToReadable, ipv4Schema, kioskPlaylistItemResponseSchema, kioskPlaylistResponseSchema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, playlistItemIdSchema, playlistItemResponseSchema, playlistQuerySchema, refreshTokenSchema, registry, reorderPlaylistSchema, rfc7807ErrorSchema, screenIdSchema, screenIpSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateContentStatusSchema, updatePlaylistItemSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
+export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreatePlaylistItemDTO, type CreateScreenDTO, type CreateUserDTO, type DashboardCenterInfraDTO, type DashboardMapBuildingDTO, type DashboardMapResponseDTO, type DashboardMapScreenDTO, type DashboardRecentActivityDTO, type DashboardStatsDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumMediaFit, type EnumPairingRequestStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type KioskPlaylistItemDTO, type KioskPlaylistResponseDTO, type LoginAuthDTO, MediaFit, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, PairingRequestStatus, type PlaylistItemResponseDTO, type ProblemDetailsDTO, type ReorderPlaylistDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateContentStatusDTO, type UpdatePlaylistItemDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createPlaylistItemSchema, createScreenSchema, createUserSchema, dashboardCenterInfraSchema, dashboardMapBuildingSchema, dashboardMapResponseSchema, dashboardMapScreenSchema, dashboardRecentActivitySchema, dashboardStatsSchema, formatMinutesToReadable, ipv4Schema, kioskPlaylistItemResponseSchema, kioskPlaylistResponseSchema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, playlistItemIdSchema, playlistItemResponseSchema, playlistQuerySchema, refreshTokenSchema, registry, reorderPlaylistSchema, rfc7807ErrorSchema, screenIdSchema, screenIpSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateContentStatusSchema, updatePlaylistItemSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
