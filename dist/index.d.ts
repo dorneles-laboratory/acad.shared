@@ -12,6 +12,27 @@ declare const loginSchema: z.ZodObject<{
 declare const refreshTokenSchema: z.ZodObject<{
     refreshToken: z.ZodString;
 }, z.core.$strip>;
+declare const registerStudentSchema: z.ZodObject<{
+    name: z.ZodString;
+    email: z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>;
+    password: z.ZodString;
+    university: z.ZodOptional<z.ZodString>;
+    campus: z.ZodOptional<z.ZodString>;
+    course: z.ZodOptional<z.ZodString>;
+    currentSemester: z.ZodOptional<z.ZodNumber>;
+}, z.core.$strip>;
+declare const userResponseSchema: z.ZodObject<{
+    id: z.ZodString;
+    name: z.ZodString;
+    email: z.ZodString;
+    role: z.ZodEnum<{
+        STUDENT: "STUDENT";
+        ADMIN: "ADMIN";
+        ADVISOR: "ADVISOR";
+    }>;
+    createdAt: z.ZodOptional<z.ZodString>;
+    updatedAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
 
 /**
  * Enums global object, exports all domains used within the system.
@@ -23,83 +44,615 @@ declare const AuthEnums: {
         readonly Unauthenticated: "UNAUTHENTICATED";
     };
 };
+declare const UserRole: {
+    readonly Student: "STUDENT";
+    readonly Admin: "ADMIN";
+    readonly Advisor: "ADVISOR";
+};
 type EnumLoginStatus = (typeof AuthEnums.LoginStatus)[keyof typeof AuthEnums.LoginStatus];
+type EnumUserRole = (typeof UserRole)[keyof typeof UserRole];
 
 interface TokenPayloadDTO {
     sub: string;
+    role: string;
 }
 type LoginAuthDTO = z.infer<typeof loginSchema>;
+type RefreshTokenDTO = z.infer<typeof refreshTokenSchema>;
+type RegisterStudentDTO = z.infer<typeof registerStudentSchema>;
+type UserResponseDTO = z.infer<typeof userResponseSchema>;
 
-declare const createUserSchema: z.ZodObject<{
-    name: z.ZodString;
-    email: z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>;
-    password: z.ZodOptional<z.ZodString>;
-    role: z.ZodDefault<z.ZodEnum<{
-        readonly SuperAdmin: "SUPER_ADMIN";
-        readonly CenterAdmin: "CENTER_ADMIN";
-        readonly Publisher: "PUBLISHER";
-    }>>;
-    centerId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    isActive: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-}, z.core.$strip>;
-declare const updateUserSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodPipe<z.ZodEmail, z.ZodTransform<string, string>>>;
-    password: z.ZodOptional<z.ZodString>;
-    role: z.ZodOptional<z.ZodEnum<{
-        readonly SuperAdmin: "SUPER_ADMIN";
-        readonly CenterAdmin: "CENTER_ADMIN";
-        readonly Publisher: "PUBLISHER";
-    }>>;
-    centerId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    isActive: z.ZodOptional<z.ZodBoolean>;
-    imageUrl: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
-declare const userResponseSchema: z.ZodObject<{
+declare const StudentEnums: {
+    Shift: {
+        readonly Morning: "MANHA";
+        readonly Afternoon: "TARDE";
+        readonly Night: "NOITE";
+        readonly FullTime: "INTEGRAL";
+    };
+};
+type EnumStudentShift = (typeof StudentEnums.Shift)[keyof typeof StudentEnums.Shift];
+
+declare const studentProfileSchema: z.ZodObject<{
     id: z.ZodString;
-    name: z.ZodString;
-    email: z.ZodString;
-    role: z.ZodEnum<{
-        readonly SuperAdmin: "SUPER_ADMIN";
-        readonly CenterAdmin: "CENTER_ADMIN";
-        readonly Publisher: "PUBLISHER";
+    userId: z.ZodString;
+    university: z.ZodString;
+    campus: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    course: z.ZodString;
+    currentSemester: z.ZodNumber;
+    registrationId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    shift: z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        MANHA: "MANHA";
+        TARDE: "TARDE";
+        NOITE: "NOITE";
+        INTEGRAL: "INTEGRAL";
+    }>>>;
+    expectedGraduationYear: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    bio: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    interests: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    academicGoals: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    lattesUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    linkedinUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    githubUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    createdAt: z.ZodOptional<z.ZodString>;
+    updatedAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const updateStudentProfileSchema: z.ZodObject<{
+    shift: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodEnum<{
+        MANHA: "MANHA";
+        TARDE: "TARDE";
+        NOITE: "NOITE";
+        INTEGRAL: "INTEGRAL";
+    }>>>>;
+    university: z.ZodOptional<z.ZodString>;
+    campus: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    course: z.ZodOptional<z.ZodString>;
+    currentSemester: z.ZodOptional<z.ZodNumber>;
+    registrationId: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    expectedGraduationYear: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodNumber>>>;
+    bio: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    interests: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    academicGoals: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    lattesUrl: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    linkedinUrl: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    githubUrl: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+}, z.core.$strip>;
+
+type StudentProfileDTO = z.infer<typeof studentProfileSchema>;
+type UpdateStudentProfileDTO = z.infer<typeof updateStudentProfileSchema>;
+
+declare const OpportunityCategory: {
+    readonly Scholarship: "SCHOLARSHIP";
+    readonly ResearchGrant: "RESEARCH_GRANT";
+    readonly TeachingAssistant: "TEACHING_ASSISTANT";
+    readonly Extension: "EXTENSION";
+    readonly Internship: "INTERNSHIP";
+    readonly Exchange: "EXCHANGE";
+    readonly GraduateProgram: "GRADUATE_PROGRAM";
+    readonly Event: "EVENT";
+    readonly Hackathon: "HACKATHON";
+};
+type EnumOpportunityCategory = (typeof OpportunityCategory)[keyof typeof OpportunityCategory];
+declare const OpportunityStatus: {
+    readonly Open: "OPEN";
+    readonly Closed: "CLOSED";
+    readonly Archived: "ARCHIVED";
+};
+type EnumOpportunityStatus = (typeof OpportunityStatus)[keyof typeof OpportunityStatus];
+declare const OpportunityModality: {
+    readonly Presential: "PRESENTIAL";
+    readonly Remote: "REMOTE";
+    readonly Hybrid: "HYBRID";
+};
+type EnumOpportunityModality = (typeof OpportunityModality)[keyof typeof OpportunityModality];
+declare const AcademicLevel: {
+    readonly Graduation: "GRADUATION";
+    readonly PostGraduation: "POST_GRADUATION";
+    readonly Technical: "TECHNICAL";
+};
+type EnumAcademicLevel = (typeof AcademicLevel)[keyof typeof AcademicLevel];
+declare const ApplicationStatus: {
+    readonly Draft: "DRAFT";
+    readonly Submitted: "SUBMITTED";
+    readonly Review: "REVIEW";
+    readonly Accepted: "ACCEPTED";
+    readonly Rejected: "REJECTED";
+    readonly Withdrawn: "WITHDRAWN";
+};
+type EnumApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
+
+declare const opportunitySchema: z.ZodObject<{
+    id: z.ZodString;
+    title: z.ZodString;
+    institution: z.ZodString;
+    institutionLogo: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    description: z.ZodString;
+    category: z.ZodEnum<{
+        SCHOLARSHIP: "SCHOLARSHIP";
+        RESEARCH_GRANT: "RESEARCH_GRANT";
+        TEACHING_ASSISTANT: "TEACHING_ASSISTANT";
+        EXTENSION: "EXTENSION";
+        INTERNSHIP: "INTERNSHIP";
+        EXCHANGE: "EXCHANGE";
+        GRADUATE_PROGRAM: "GRADUATE_PROGRAM";
+        EVENT: "EVENT";
+        HACKATHON: "HACKATHON";
     }>;
-    imageUrl: z.ZodNullable<z.ZodString>;
-    isActive: z.ZodBoolean;
-    centerId: z.ZodNullable<z.ZodString>;
-    center: z.ZodOptional<z.ZodObject<{
+    modality: z.ZodDefault<z.ZodEnum<{
+        PRESENTIAL: "PRESENTIAL";
+        REMOTE: "REMOTE";
+        HYBRID: "HYBRID";
+    }>>;
+    level: z.ZodDefault<z.ZodEnum<{
+        GRADUATION: "GRADUATION";
+        POST_GRADUATION: "POST_GRADUATION";
+        TECHNICAL: "TECHNICAL";
+    }>>;
+    value: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    benefits: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    requirements: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    targetCourses: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    deadline: z.ZodString;
+    publishedAt: z.ZodString;
+    matchScore: z.ZodDefault<z.ZodNumber>;
+    externalUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    status: z.ZodDefault<z.ZodEnum<{
+        OPEN: "OPEN";
+        CLOSED: "CLOSED";
+        ARCHIVED: "ARCHIVED";
+    }>>;
+    createdAt: z.ZodOptional<z.ZodString>;
+    updatedAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const createOpportunitySchema: z.ZodObject<{
+    value: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    title: z.ZodString;
+    description: z.ZodString;
+    institution: z.ZodString;
+    institutionLogo: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    category: z.ZodEnum<{
+        SCHOLARSHIP: "SCHOLARSHIP";
+        RESEARCH_GRANT: "RESEARCH_GRANT";
+        TEACHING_ASSISTANT: "TEACHING_ASSISTANT";
+        EXTENSION: "EXTENSION";
+        INTERNSHIP: "INTERNSHIP";
+        EXCHANGE: "EXCHANGE";
+        GRADUATE_PROGRAM: "GRADUATE_PROGRAM";
+        EVENT: "EVENT";
+        HACKATHON: "HACKATHON";
+    }>;
+    modality: z.ZodDefault<z.ZodEnum<{
+        PRESENTIAL: "PRESENTIAL";
+        REMOTE: "REMOTE";
+        HYBRID: "HYBRID";
+    }>>;
+    level: z.ZodDefault<z.ZodEnum<{
+        GRADUATION: "GRADUATION";
+        POST_GRADUATION: "POST_GRADUATION";
+        TECHNICAL: "TECHNICAL";
+    }>>;
+    benefits: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    requirements: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    targetCourses: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    deadline: z.ZodString;
+    publishedAt: z.ZodString;
+    externalUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    status: z.ZodDefault<z.ZodEnum<{
+        OPEN: "OPEN";
+        CLOSED: "CLOSED";
+        ARCHIVED: "ARCHIVED";
+    }>>;
+}, z.core.$strip>;
+declare const updateOpportunitySchema: z.ZodObject<{
+    value: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    institution: z.ZodOptional<z.ZodString>;
+    institutionLogo: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    category: z.ZodOptional<z.ZodEnum<{
+        SCHOLARSHIP: "SCHOLARSHIP";
+        RESEARCH_GRANT: "RESEARCH_GRANT";
+        TEACHING_ASSISTANT: "TEACHING_ASSISTANT";
+        EXTENSION: "EXTENSION";
+        INTERNSHIP: "INTERNSHIP";
+        EXCHANGE: "EXCHANGE";
+        GRADUATE_PROGRAM: "GRADUATE_PROGRAM";
+        EVENT: "EVENT";
+        HACKATHON: "HACKATHON";
+    }>>;
+    modality: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        PRESENTIAL: "PRESENTIAL";
+        REMOTE: "REMOTE";
+        HYBRID: "HYBRID";
+    }>>>;
+    level: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        GRADUATION: "GRADUATION";
+        POST_GRADUATION: "POST_GRADUATION";
+        TECHNICAL: "TECHNICAL";
+    }>>>;
+    benefits: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    requirements: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    targetCourses: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    deadline: z.ZodOptional<z.ZodString>;
+    publishedAt: z.ZodOptional<z.ZodString>;
+    externalUrl: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    status: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        OPEN: "OPEN";
+        CLOSED: "CLOSED";
+        ARCHIVED: "ARCHIVED";
+    }>>>;
+}, z.core.$strip>;
+declare const applicationSchema: z.ZodObject<{
+    id: z.ZodString;
+    studentId: z.ZodString;
+    opportunityId: z.ZodString;
+    status: z.ZodDefault<z.ZodEnum<{
+        DRAFT: "DRAFT";
+        SUBMITTED: "SUBMITTED";
+        REVIEW: "REVIEW";
+        ACCEPTED: "ACCEPTED";
+        REJECTED: "REJECTED";
+        WITHDRAWN: "WITHDRAWN";
+    }>>;
+    notes: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    appliedAt: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    opportunity: z.ZodOptional<z.ZodObject<{
         id: z.ZodString;
-        name: z.ZodString;
-        acronym: z.ZodString;
-        color: z.ZodString;
-        status: z.ZodEnum<{
-            readonly Active: "ACTIVE";
-            readonly Inactive: "INACTIVE";
+        title: z.ZodString;
+        institution: z.ZodString;
+        institutionLogo: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        description: z.ZodString;
+        category: z.ZodEnum<{
+            SCHOLARSHIP: "SCHOLARSHIP";
+            RESEARCH_GRANT: "RESEARCH_GRANT";
+            TEACHING_ASSISTANT: "TEACHING_ASSISTANT";
+            EXTENSION: "EXTENSION";
+            INTERNSHIP: "INTERNSHIP";
+            EXCHANGE: "EXCHANGE";
+            GRADUATE_PROGRAM: "GRADUATE_PROGRAM";
+            EVENT: "EVENT";
+            HACKATHON: "HACKATHON";
         }>;
-        buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            description: z.ZodNullable<z.ZodString>;
-            status: z.ZodEnum<{
-                readonly Active: "ACTIVE";
-                readonly Inactive: "INACTIVE";
-            }>;
-            centerId: z.ZodString;
-            latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            createdAt: z.ZodDate;
-            updatedAt: z.ZodDate;
-        }, z.core.$strip>>>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
+        modality: z.ZodDefault<z.ZodEnum<{
+            PRESENTIAL: "PRESENTIAL";
+            REMOTE: "REMOTE";
+            HYBRID: "HYBRID";
+        }>>;
+        level: z.ZodDefault<z.ZodEnum<{
+            GRADUATION: "GRADUATION";
+            POST_GRADUATION: "POST_GRADUATION";
+            TECHNICAL: "TECHNICAL";
+        }>>;
+        value: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        benefits: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        requirements: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        targetCourses: z.ZodDefault<z.ZodArray<z.ZodString>>;
+        deadline: z.ZodString;
+        publishedAt: z.ZodString;
+        matchScore: z.ZodDefault<z.ZodNumber>;
+        externalUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        status: z.ZodDefault<z.ZodEnum<{
+            OPEN: "OPEN";
+            CLOSED: "CLOSED";
+            ARCHIVED: "ARCHIVED";
+        }>>;
+        createdAt: z.ZodOptional<z.ZodString>;
+        updatedAt: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
-    created_at: z.ZodCoercedDate<unknown>;
-    updated_at: z.ZodCoercedDate<unknown>;
-    temporaryPassword: z.ZodOptional<z.ZodString>;
+    createdAt: z.ZodOptional<z.ZodString>;
+    updatedAt: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
-declare const userIdSchema: z.ZodObject<{
-    id: z.ZodUUID;
+declare const createApplicationSchema: z.ZodObject<{
+    opportunityId: z.ZodString;
+    status: z.ZodDefault<z.ZodEnum<{
+        DRAFT: "DRAFT";
+        SUBMITTED: "SUBMITTED";
+        REVIEW: "REVIEW";
+        ACCEPTED: "ACCEPTED";
+        REJECTED: "REJECTED";
+        WITHDRAWN: "WITHDRAWN";
+    }>>;
+    notes: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
+declare const updateApplicationStatusSchema: z.ZodObject<{
+    status: z.ZodEnum<{
+        DRAFT: "DRAFT";
+        SUBMITTED: "SUBMITTED";
+        REVIEW: "REVIEW";
+        ACCEPTED: "ACCEPTED";
+        REJECTED: "REJECTED";
+        WITHDRAWN: "WITHDRAWN";
+    }>;
+    notes: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const opportunityFilterQuerySchema: z.ZodObject<{
+    search: z.ZodOptional<z.ZodString>;
+    category: z.ZodOptional<z.ZodString>;
+    modality: z.ZodOptional<z.ZodString>;
+    level: z.ZodOptional<z.ZodString>;
+    minMatch: z.ZodOptional<z.ZodCoercedNumber<unknown>>;
+    page: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
+    limit: z.ZodDefault<z.ZodCoercedNumber<unknown>>;
+}, z.core.$strip>;
+
+type OpportunityDTO = z.infer<typeof opportunitySchema>;
+type CreateOpportunityDTO = z.infer<typeof createOpportunitySchema>;
+type UpdateOpportunityDTO = z.infer<typeof updateOpportunitySchema>;
+type ApplicationDTO = z.infer<typeof applicationSchema>;
+type CreateApplicationDTO = z.infer<typeof createApplicationSchema>;
+type UpdateApplicationStatusDTO = z.infer<typeof updateApplicationStatusSchema>;
+type OpportunityFilterQueryDTO = z.infer<typeof opportunityFilterQuerySchema>;
+
+declare const ExperienceType: {
+    readonly Project: "PROJECT";
+    readonly Internship: "INTERNSHIP";
+    readonly Research: "RESEARCH";
+    readonly Extension: "EXTENSION";
+    readonly Teaching: "TEACHING";
+    readonly Competition: "COMPETITION";
+    readonly Event: "EVENT";
+};
+type EnumExperienceType = (typeof ExperienceType)[keyof typeof ExperienceType];
+declare const ExperienceStatus: {
+    readonly InProgress: "IN_PROGRESS";
+    readonly Completed: "COMPLETED";
+    readonly Paused: "PAUSED";
+};
+type EnumExperienceStatus = (typeof ExperienceStatus)[keyof typeof ExperienceStatus];
+
+declare const experienceSchema: z.ZodObject<{
+    id: z.ZodString;
+    studentId: z.ZodString;
+    title: z.ZodString;
+    type: z.ZodEnum<{
+        EXTENSION: "EXTENSION";
+        INTERNSHIP: "INTERNSHIP";
+        EVENT: "EVENT";
+        PROJECT: "PROJECT";
+        RESEARCH: "RESEARCH";
+        TEACHING: "TEACHING";
+        COMPETITION: "COMPETITION";
+    }>;
+    status: z.ZodDefault<z.ZodEnum<{
+        IN_PROGRESS: "IN_PROGRESS";
+        COMPLETED: "COMPLETED";
+        PAUSED: "PAUSED";
+    }>>;
+    role: z.ZodString;
+    institution: z.ZodString;
+    advisor: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    startDate: z.ZodString;
+    endDate: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    weeklyHours: z.ZodDefault<z.ZodNumber>;
+    totalHours: z.ZodDefault<z.ZodNumber>;
+    description: z.ZodString;
+    skills: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    createdAt: z.ZodOptional<z.ZodString>;
+    updatedAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const createExperienceSchema: z.ZodObject<{
+    type: z.ZodEnum<{
+        EXTENSION: "EXTENSION";
+        INTERNSHIP: "INTERNSHIP";
+        EVENT: "EVENT";
+        PROJECT: "PROJECT";
+        RESEARCH: "RESEARCH";
+        TEACHING: "TEACHING";
+        COMPETITION: "COMPETITION";
+    }>;
+    title: z.ZodString;
+    description: z.ZodString;
+    role: z.ZodString;
+    institution: z.ZodString;
+    status: z.ZodDefault<z.ZodEnum<{
+        IN_PROGRESS: "IN_PROGRESS";
+        COMPLETED: "COMPLETED";
+        PAUSED: "PAUSED";
+    }>>;
+    advisor: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    startDate: z.ZodString;
+    endDate: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    weeklyHours: z.ZodDefault<z.ZodNumber>;
+    skills: z.ZodDefault<z.ZodArray<z.ZodString>>;
+}, z.core.$strip>;
+declare const updateExperienceSchema: z.ZodObject<{
+    type: z.ZodOptional<z.ZodEnum<{
+        EXTENSION: "EXTENSION";
+        INTERNSHIP: "INTERNSHIP";
+        EVENT: "EVENT";
+        PROJECT: "PROJECT";
+        RESEARCH: "RESEARCH";
+        TEACHING: "TEACHING";
+        COMPETITION: "COMPETITION";
+    }>>;
+    title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    role: z.ZodOptional<z.ZodString>;
+    institution: z.ZodOptional<z.ZodString>;
+    status: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        IN_PROGRESS: "IN_PROGRESS";
+        COMPLETED: "COMPLETED";
+        PAUSED: "PAUSED";
+    }>>>;
+    advisor: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    startDate: z.ZodOptional<z.ZodString>;
+    endDate: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    weeklyHours: z.ZodOptional<z.ZodDefault<z.ZodNumber>>;
+    skills: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+}, z.core.$strip>;
+
+type ExperienceDTO = z.infer<typeof experienceSchema>;
+type CreateExperienceDTO = z.infer<typeof createExperienceSchema>;
+type UpdateExperienceDTO = z.infer<typeof updateExperienceSchema>;
+
+declare const MemoryFormat: {
+    readonly Text: "TEXT";
+    readonly Audio: "AUDIO";
+    readonly Image: "IMAGE";
+    readonly Multimedia: "MULTIMEDIA";
+};
+type EnumMemoryFormat = (typeof MemoryFormat)[keyof typeof MemoryFormat];
+declare const MemoryType: {
+    readonly Aprendizado: "APRENDIZADO";
+    readonly Reflexao: "REFLEXAO";
+    readonly Insight: "INSIGHT";
+    readonly Conquista: "CONQUISTA";
+    readonly Duvida: "DUVIDA";
+};
+type EnumMemoryType = (typeof MemoryType)[keyof typeof MemoryType];
+
+declare const memorySchema: z.ZodObject<{
+    id: z.ZodString;
+    studentId: z.ZodString;
+    title: z.ZodDefault<z.ZodString>;
+    content: z.ZodString;
+    type: z.ZodDefault<z.ZodEnum<{
+        APRENDIZADO: "APRENDIZADO";
+        REFLEXAO: "REFLEXAO";
+        INSIGHT: "INSIGHT";
+        CONQUISTA: "CONQUISTA";
+        DUVIDA: "DUVIDA";
+    }>>;
+    format: z.ZodDefault<z.ZodEnum<{
+        TEXT: "TEXT";
+        AUDIO: "AUDIO";
+        IMAGE: "IMAGE";
+        MULTIMEDIA: "MULTIMEDIA";
+    }>>;
+    tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    course: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    experienceId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    audioUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    audioDuration: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    date: z.ZodString;
+    createdAt: z.ZodOptional<z.ZodString>;
+    updatedAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const createMemorySchema: z.ZodObject<{
+    date: z.ZodString;
+    type: z.ZodDefault<z.ZodEnum<{
+        APRENDIZADO: "APRENDIZADO";
+        REFLEXAO: "REFLEXAO";
+        INSIGHT: "INSIGHT";
+        CONQUISTA: "CONQUISTA";
+        DUVIDA: "DUVIDA";
+    }>>;
+    format: z.ZodDefault<z.ZodEnum<{
+        TEXT: "TEXT";
+        AUDIO: "AUDIO";
+        IMAGE: "IMAGE";
+        MULTIMEDIA: "MULTIMEDIA";
+    }>>;
+    title: z.ZodDefault<z.ZodString>;
+    content: z.ZodString;
+    course: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    experienceId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    audioUrl: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    audioDuration: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+}, z.core.$strip>;
+declare const updateMemorySchema: z.ZodObject<{
+    date: z.ZodOptional<z.ZodString>;
+    type: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        APRENDIZADO: "APRENDIZADO";
+        REFLEXAO: "REFLEXAO";
+        INSIGHT: "INSIGHT";
+        CONQUISTA: "CONQUISTA";
+        DUVIDA: "DUVIDA";
+    }>>>;
+    format: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
+        TEXT: "TEXT";
+        AUDIO: "AUDIO";
+        IMAGE: "IMAGE";
+        MULTIMEDIA: "MULTIMEDIA";
+    }>>>;
+    title: z.ZodOptional<z.ZodDefault<z.ZodString>>;
+    content: z.ZodOptional<z.ZodString>;
+    course: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    tags: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    experienceId: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    audioUrl: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodString>>>;
+    audioDuration: z.ZodOptional<z.ZodOptional<z.ZodNullable<z.ZodNumber>>>;
+}, z.core.$strip>;
+
+type AcademicMemoryDTO = z.infer<typeof memorySchema>;
+type CreateMemoryDTO = z.infer<typeof createMemorySchema>;
+type UpdateMemoryDTO = z.infer<typeof updateMemorySchema>;
+
+declare const TransactionType: {
+    readonly StripePurchase: "STRIPE_PURCHASE";
+    readonly AiUsage: "AI_USAGE";
+    readonly CommunityDonationOut: "COMMUNITY_DONATION_OUT";
+    readonly CommunityDonationIn: "COMMUNITY_DONATION_IN";
+    readonly WelcomeBonus: "WELCOME_BONUS";
+    readonly AdminGrant: "ADMIN_GRANT";
+};
+type EnumTransactionType = (typeof TransactionType)[keyof typeof TransactionType];
+declare const SolidaryStatus: {
+    readonly None: "NONE";
+    readonly Pending: "PENDING";
+    readonly Approved: "APPROVED";
+    readonly Rejected: "REJECTED";
+};
+type EnumSolidaryStatus = (typeof SolidaryStatus)[keyof typeof SolidaryStatus];
+
+declare const userWalletSchema: z.ZodObject<{
+    id: z.ZodString;
+    userId: z.ZodString;
+    tokenBalance: z.ZodDefault<z.ZodNumber>;
+    isSolidaryBeneficiary: z.ZodDefault<z.ZodBoolean>;
+    solidaryStatus: z.ZodDefault<z.ZodEnum<{
+        PENDING: "PENDING";
+        REJECTED: "REJECTED";
+        NONE: "NONE";
+        APPROVED: "APPROVED";
+    }>>;
+    updatedAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const tokenTransactionSchema: z.ZodObject<{
+    id: z.ZodString;
+    walletId: z.ZodString;
+    amount: z.ZodNumber;
+    type: z.ZodEnum<{
+        STRIPE_PURCHASE: "STRIPE_PURCHASE";
+        AI_USAGE: "AI_USAGE";
+        COMMUNITY_DONATION_OUT: "COMMUNITY_DONATION_OUT";
+        COMMUNITY_DONATION_IN: "COMMUNITY_DONATION_IN";
+        WELCOME_BONUS: "WELCOME_BONUS";
+        ADMIN_GRANT: "ADMIN_GRANT";
+    }>;
+    description: z.ZodString;
+    createdAt: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+declare const simulateRechargeSchema: z.ZodObject<{
+    amountReals: z.ZodNumber;
+}, z.core.$strip>;
+declare const rechargeSimulationResultSchema: z.ZodObject<{
+    amountReals: z.ZodNumber;
+    netAmountAfterFees: z.ZodNumber;
+    tokensGenerated: z.ZodNumber;
+    bonusTokens: z.ZodNumber;
+    totalTokens: z.ZodNumber;
+    purchasingPower: z.ZodObject<{
+        opportunitiesSearches: z.ZodNumber;
+        aiChatQuestions: z.ZodNumber;
+        lattesAudits: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+declare const createCheckoutSessionSchema: z.ZodObject<{
+    amountReals: z.ZodNumber;
+    menuItemName: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+
+type UserWalletDTO = z.infer<typeof userWalletSchema>;
+type TokenTransactionDTO = z.infer<typeof tokenTransactionSchema>;
+type SimulateRechargeDTO = z.infer<typeof simulateRechargeSchema>;
+type RechargeSimulationResultDTO = z.infer<typeof rechargeSimulationResultSchema>;
+type CreateCheckoutSessionDTO = z.infer<typeof createCheckoutSessionSchema>;
+
+declare const uploadResponseSchema: z.ZodObject<{
+    url: z.ZodString;
+}, z.core.$strip>;
+
+type UploadResponseDTO = z.infer<typeof uploadResponseSchema>;
 
 declare const rfc7807ErrorSchema: z.ZodObject<{
     type: z.ZodOptional<z.ZodString>;
@@ -138,894 +691,6 @@ interface PaginatedResultDTO<T> {
     meta: PaginationMetaDTO;
 }
 
-type CreateUserDTO = z.infer<typeof createUserSchema>;
-type UpdateUserDTO = z.infer<typeof updateUserSchema>;
-type UserIdDTO = z.infer<typeof userIdSchema>;
-type UserResponseDTO = z.infer<typeof userResponseSchema>;
-type PaginatedUsersDTO = PaginatedResultDTO<UserResponseDTO>;
-
-declare const UserRole: {
-    readonly SuperAdmin: "SUPER_ADMIN";
-    readonly CenterAdmin: "CENTER_ADMIN";
-    readonly Publisher: "PUBLISHER";
-};
-type EnumUserRole = (typeof UserRole)[keyof typeof UserRole];
-
-declare const createBuildingSchema: z.ZodObject<{
-    name: z.ZodString;
-    description: z.ZodOptional<z.ZodString>;
-    centerId: z.ZodString;
-    latitude: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
-    longitude: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
-}, z.core.$strip>;
-declare const updateBuildingSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    description: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    centerId: z.ZodOptional<z.ZodString>;
-    latitude: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
-    longitude: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Inactive: "INACTIVE";
-    }>>;
-}, z.core.$strip>;
-declare const buildingResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    description: z.ZodNullable<z.ZodString>;
-    status: z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Inactive: "INACTIVE";
-    }>;
-    centerId: z.ZodString;
-    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
-}, z.core.$strip>;
-declare const buildingIdSchema: z.ZodObject<{
-    id: z.ZodString;
-}, z.core.$strip>;
-declare const buildingQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    query: z.ZodOptional<z.ZodString>;
-    centerId: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Inactive: "INACTIVE";
-    }>>;
-}, z.core.$strip>;
-
-type CreateBuildingDTO = z.infer<typeof createBuildingSchema>;
-type UpdateBuildingDTO = z.infer<typeof updateBuildingSchema>;
-type BuildingResponseDTO = z.infer<typeof buildingResponseSchema>;
-type BuildingIdDTO = z.infer<typeof buildingIdSchema>;
-type BuildingQueryDTO = z.infer<typeof buildingQuerySchema>;
-type PaginatedBuildingsDTO = PaginatedResultDTO<BuildingResponseDTO>;
-
-declare const createCenterSchema: z.ZodObject<{
-    name: z.ZodString;
-    acronym: z.ZodString;
-    color: z.ZodString;
-}, z.core.$strip>;
-declare const updateCenterSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    acronym: z.ZodOptional<z.ZodString>;
-    color: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Inactive: "INACTIVE";
-    }>>;
-}, z.core.$strip>;
-declare const centerResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    acronym: z.ZodString;
-    color: z.ZodString;
-    status: z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Inactive: "INACTIVE";
-    }>;
-    buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        description: z.ZodNullable<z.ZodString>;
-        status: z.ZodEnum<{
-            readonly Active: "ACTIVE";
-            readonly Inactive: "INACTIVE";
-        }>;
-        centerId: z.ZodString;
-        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
-    }, z.core.$strip>>>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
-}, z.core.$strip>;
-declare const centerIdSchema: z.ZodObject<{
-    id: z.ZodString;
-}, z.core.$strip>;
-declare const centerQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    query: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Active: "ACTIVE";
-        readonly Inactive: "INACTIVE";
-    }>>;
-    includeBuildings: z.ZodDefault<z.ZodOptional<z.ZodCoercedBoolean<unknown>>>;
-    includeScreens: z.ZodDefault<z.ZodOptional<z.ZodCoercedBoolean<unknown>>>;
-}, z.core.$strip>;
-
-type CreateCenterDTO = z.infer<typeof createCenterSchema>;
-type UpdateCenterDTO = z.infer<typeof updateCenterSchema>;
-type CenterResponseDTO = z.infer<typeof centerResponseSchema>;
-type CenterIdDTO = z.infer<typeof centerIdSchema>;
-type CenterQueryDTO = z.infer<typeof centerQuerySchema>;
-type PaginatedCentersDTO = PaginatedResultDTO<CenterResponseDTO>;
-
-declare const screenIpSchema: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">, z.ZodNull]>>>;
-declare const createScreenSchema: z.ZodObject<{
-    name: z.ZodString;
-    ip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">, z.ZodNull]>>>;
-    buildingId: z.ZodString;
-    isPaired: z.ZodDefault<z.ZodBoolean>;
-    isPrivate: z.ZodDefault<z.ZodBoolean>;
-}, z.core.$strip>;
-declare const updateScreenSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodString>;
-    ip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodLiteral<"">, z.ZodNull]>>>;
-    buildingId: z.ZodOptional<z.ZodString>;
-    isPaired: z.ZodOptional<z.ZodBoolean>;
-    isPrivate: z.ZodOptional<z.ZodBoolean>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Online: "ONLINE";
-        readonly Offline: "OFFLINE";
-        readonly Syncing: "SYNCING";
-    }>>;
-    pin: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
-declare const screenResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    ip: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    status: z.ZodEnum<{
-        readonly Online: "ONLINE";
-        readonly Offline: "OFFLINE";
-        readonly Syncing: "SYNCING";
-    }>;
-    buildingId: z.ZodString;
-    isPaired: z.ZodBoolean;
-    isPrivate: z.ZodBoolean;
-    building: z.ZodOptional<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        description: z.ZodNullable<z.ZodString>;
-        status: z.ZodEnum<{
-            readonly Active: "ACTIVE";
-            readonly Inactive: "INACTIVE";
-        }>;
-        centerId: z.ZodString;
-        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
-    }, z.core.$strip>>;
-    createdAt: z.ZodCoercedDate<unknown>;
-    updatedAt: z.ZodCoercedDate<unknown>;
-}, z.core.$strip>;
-declare const screenIdSchema: z.ZodObject<{
-    id: z.ZodString;
-}, z.core.$strip>;
-declare const screenQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    query: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Online: "ONLINE";
-        readonly Offline: "OFFLINE";
-        readonly Syncing: "SYNCING";
-    }>>;
-    centerId: z.ZodOptional<z.ZodString>;
-    buildingId: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
-
-declare const ScreenStatus: {
-    readonly Online: "ONLINE";
-    readonly Offline: "OFFLINE";
-    readonly Syncing: "SYNCING";
-};
-type EnumScreenStatus = (typeof ScreenStatus)[keyof typeof ScreenStatus];
-declare const PairingRequestStatus: {
-    readonly Pending: "PENDING";
-    readonly Approved: "APPROVED";
-};
-type EnumPairingRequestStatus = (typeof PairingRequestStatus)[keyof typeof PairingRequestStatus];
-
-type CreateScreenDTO = z.infer<typeof createScreenSchema>;
-type UpdateScreenDTO = z.infer<typeof updateScreenSchema>;
-type ScreenResponseDTO = z.infer<typeof screenResponseSchema>;
-type ScreenIdDTO = z.infer<typeof screenIdSchema>;
-type ScreenQueryDTO = z.infer<typeof screenQuerySchema>;
-type PaginatedScreensDTO = PaginatedResultDTO<ScreenResponseDTO>;
-
-declare const createContentSchema: z.ZodObject<{
-    title: z.ZodString;
-    type: z.ZodEnum<{
-        readonly Image: "IMAGE";
-        readonly Video: "VIDEO";
-        readonly Notice: "NOTICE";
-        readonly WebUrl: "WEB_URL";
-    }>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Draft: "DRAFT";
-        readonly Scheduled: "SCHEDULED";
-        readonly Active: "ACTIVE";
-        readonly Expired: "EXPIRED";
-        readonly Archived: "ARCHIVED";
-    }>>;
-    startDate: z.ZodOptional<z.ZodCoercedDate<unknown>>;
-    endDate: z.ZodOptional<z.ZodCoercedDate<unknown>>;
-    author: z.ZodOptional<z.ZodString>;
-    contentUrl: z.ZodOptional<z.ZodString>;
-    mediaUrl: z.ZodOptional<z.ZodString>;
-    textBody: z.ZodString;
-    showTitle: z.ZodDefault<z.ZodBoolean>;
-    showAuthor: z.ZodDefault<z.ZodBoolean>;
-    showQrCode: z.ZodDefault<z.ZodBoolean>;
-    showTime: z.ZodDefault<z.ZodBoolean>;
-    showScreenName: z.ZodDefault<z.ZodBoolean>;
-    showTypeBadge: z.ZodDefault<z.ZodBoolean>;
-    showDeadline: z.ZodDefault<z.ZodBoolean>;
-    isCarousel: z.ZodDefault<z.ZodBoolean>;
-    isPrivate: z.ZodDefault<z.ZodBoolean>;
-    mediaFit: z.ZodDefault<z.ZodEnum<{
-        readonly Cover: "COVER";
-        readonly Contain: "CONTAIN";
-        readonly Fill: "FILL";
-        readonly Blur: "BLUR";
-    }>>;
-}, z.core.$strip>;
-declare const updateContentSchema: z.ZodObject<{
-    title: z.ZodOptional<z.ZodString>;
-    type: z.ZodOptional<z.ZodEnum<{
-        readonly Image: "IMAGE";
-        readonly Video: "VIDEO";
-        readonly Notice: "NOTICE";
-        readonly WebUrl: "WEB_URL";
-    }>>;
-    status: z.ZodOptional<z.ZodOptional<z.ZodEnum<{
-        readonly Draft: "DRAFT";
-        readonly Scheduled: "SCHEDULED";
-        readonly Active: "ACTIVE";
-        readonly Expired: "EXPIRED";
-        readonly Archived: "ARCHIVED";
-    }>>>;
-    startDate: z.ZodOptional<z.ZodOptional<z.ZodCoercedDate<unknown>>>;
-    endDate: z.ZodOptional<z.ZodOptional<z.ZodCoercedDate<unknown>>>;
-    author: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    contentUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    mediaUrl: z.ZodOptional<z.ZodOptional<z.ZodString>>;
-    textBody: z.ZodOptional<z.ZodString>;
-    showTitle: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    showAuthor: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    showQrCode: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    showTime: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    showScreenName: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    showTypeBadge: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    showDeadline: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    isCarousel: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    isPrivate: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
-    mediaFit: z.ZodOptional<z.ZodDefault<z.ZodEnum<{
-        readonly Cover: "COVER";
-        readonly Contain: "CONTAIN";
-        readonly Fill: "FILL";
-        readonly Blur: "BLUR";
-    }>>>;
-}, z.core.$strip>;
-declare const updateContentStatusSchema: z.ZodObject<{
-    status: z.ZodEnum<{
-        readonly Draft: "DRAFT";
-        readonly Scheduled: "SCHEDULED";
-        readonly Active: "ACTIVE";
-        readonly Expired: "EXPIRED";
-        readonly Archived: "ARCHIVED";
-    }>;
-}, z.core.$strip>;
-declare const contentResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    title: z.ZodString;
-    type: z.ZodEnum<{
-        readonly Image: "IMAGE";
-        readonly Video: "VIDEO";
-        readonly Notice: "NOTICE";
-        readonly WebUrl: "WEB_URL";
-    }>;
-    status: z.ZodEnum<{
-        readonly Draft: "DRAFT";
-        readonly Scheduled: "SCHEDULED";
-        readonly Active: "ACTIVE";
-        readonly Expired: "EXPIRED";
-        readonly Archived: "ARCHIVED";
-    }>;
-    startDate: z.ZodNullable<z.ZodDate>;
-    endDate: z.ZodNullable<z.ZodDate>;
-    author: z.ZodNullable<z.ZodString>;
-    contentUrl: z.ZodNullable<z.ZodString>;
-    mediaUrl: z.ZodNullable<z.ZodString>;
-    textBody: z.ZodNullable<z.ZodString>;
-    ownerId: z.ZodString;
-    owner: z.ZodOptional<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        email: z.ZodString;
-        role: z.ZodEnum<{
-            readonly SuperAdmin: "SUPER_ADMIN";
-            readonly CenterAdmin: "CENTER_ADMIN";
-            readonly Publisher: "PUBLISHER";
-        }>;
-        imageUrl: z.ZodNullable<z.ZodString>;
-        isActive: z.ZodBoolean;
-        centerId: z.ZodNullable<z.ZodString>;
-        center: z.ZodOptional<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            acronym: z.ZodString;
-            color: z.ZodString;
-            status: z.ZodEnum<{
-                readonly Active: "ACTIVE";
-                readonly Inactive: "INACTIVE";
-            }>;
-            buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                id: z.ZodString;
-                name: z.ZodString;
-                description: z.ZodNullable<z.ZodString>;
-                status: z.ZodEnum<{
-                    readonly Active: "ACTIVE";
-                    readonly Inactive: "INACTIVE";
-                }>;
-                centerId: z.ZodString;
-                latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                createdAt: z.ZodDate;
-                updatedAt: z.ZodDate;
-            }, z.core.$strip>>>;
-            createdAt: z.ZodDate;
-            updatedAt: z.ZodDate;
-        }, z.core.$strip>>;
-        created_at: z.ZodCoercedDate<unknown>;
-        updated_at: z.ZodCoercedDate<unknown>;
-        temporaryPassword: z.ZodOptional<z.ZodString>;
-    }, z.core.$strip>>;
-    showTitle: z.ZodBoolean;
-    showAuthor: z.ZodBoolean;
-    showQrCode: z.ZodBoolean;
-    showTime: z.ZodBoolean;
-    showScreenName: z.ZodBoolean;
-    showTypeBadge: z.ZodBoolean;
-    showDeadline: z.ZodBoolean;
-    isCarousel: z.ZodBoolean;
-    isPrivate: z.ZodBoolean;
-    mediaFit: z.ZodDefault<z.ZodEnum<{
-        readonly Cover: "COVER";
-        readonly Contain: "CONTAIN";
-        readonly Fill: "FILL";
-        readonly Blur: "BLUR";
-    }>>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
-}, z.core.$strip>;
-declare const contentIdSchema: z.ZodObject<{
-    id: z.ZodString;
-}, z.core.$strip>;
-declare const contentQuerySchema: z.ZodObject<{
-    page: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    limit: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;
-    query: z.ZodOptional<z.ZodString>;
-    status: z.ZodOptional<z.ZodEnum<{
-        readonly Draft: "DRAFT";
-        readonly Scheduled: "SCHEDULED";
-        readonly Active: "ACTIVE";
-        readonly Expired: "EXPIRED";
-        readonly Archived: "ARCHIVED";
-    }>>;
-    type: z.ZodOptional<z.ZodEnum<{
-        readonly Image: "IMAGE";
-        readonly Video: "VIDEO";
-        readonly Notice: "NOTICE";
-        readonly WebUrl: "WEB_URL";
-    }>>;
-    onlyMyCenter: z.ZodPipe<z.ZodTransform<boolean, unknown>, z.ZodOptional<z.ZodBoolean>>;
-    onlyMyContents: z.ZodPipe<z.ZodTransform<boolean, unknown>, z.ZodOptional<z.ZodBoolean>>;
-}, z.core.$strip>;
-
-declare const ContentType: {
-    readonly Image: "IMAGE";
-    readonly Video: "VIDEO";
-    readonly Notice: "NOTICE";
-    readonly WebUrl: "WEB_URL";
-};
-type EnumContentType = (typeof ContentType)[keyof typeof ContentType];
-declare const ContentStatus: {
-    readonly Draft: "DRAFT";
-    readonly Scheduled: "SCHEDULED";
-    readonly Active: "ACTIVE";
-    readonly Expired: "EXPIRED";
-    readonly Archived: "ARCHIVED";
-};
-type EnumContentStatus = (typeof ContentStatus)[keyof typeof ContentStatus];
-declare const MediaFit: {
-    readonly Cover: "COVER";
-    readonly Contain: "CONTAIN";
-    readonly Fill: "FILL";
-    readonly Blur: "BLUR";
-};
-type EnumMediaFit = (typeof MediaFit)[keyof typeof MediaFit];
-
-type CreateContentDTO = z.infer<typeof createContentSchema>;
-type UpdateContentDTO = z.infer<typeof updateContentSchema>;
-type UpdateContentStatusDTO = z.infer<typeof updateContentStatusSchema>;
-type ContentResponseDTO = z.infer<typeof contentResponseSchema>;
-type ContentIdDTO = z.infer<typeof contentIdSchema>;
-type ContentQueryDTO = z.infer<typeof contentQuerySchema>;
-type PaginatedContentsDTO = PaginatedResultDTO<ContentResponseDTO>;
-
-declare const uploadResponseSchema: z.ZodObject<{
-    url: z.ZodString;
-}, z.core.$strip>;
-
-type UploadResponseDTO = z.infer<typeof uploadResponseSchema>;
-
-declare const createPlaylistItemSchema: z.ZodObject<{
-    buildingId: z.ZodOptional<z.ZodString>;
-    screenId: z.ZodOptional<z.ZodString>;
-    contentId: z.ZodString;
-    duration: z.ZodDefault<z.ZodNumber>;
-    order: z.ZodDefault<z.ZodNumber>;
-}, z.core.$strip>;
-declare const updatePlaylistItemSchema: z.ZodObject<{
-    duration: z.ZodOptional<z.ZodNumber>;
-    order: z.ZodOptional<z.ZodNumber>;
-}, z.core.$strip>;
-declare const reorderPlaylistSchema: z.ZodObject<{
-    buildingId: z.ZodOptional<z.ZodString>;
-    screenId: z.ZodOptional<z.ZodString>;
-    items: z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        order: z.ZodNumber;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-declare const playlistItemResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    buildingId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    screenId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    contentId: z.ZodString;
-    duration: z.ZodNumber;
-    order: z.ZodNumber;
-    content: z.ZodOptional<z.ZodObject<{
-        id: z.ZodString;
-        title: z.ZodString;
-        type: z.ZodEnum<{
-            readonly Image: "IMAGE";
-            readonly Video: "VIDEO";
-            readonly Notice: "NOTICE";
-            readonly WebUrl: "WEB_URL";
-        }>;
-        status: z.ZodEnum<{
-            readonly Draft: "DRAFT";
-            readonly Scheduled: "SCHEDULED";
-            readonly Active: "ACTIVE";
-            readonly Expired: "EXPIRED";
-            readonly Archived: "ARCHIVED";
-        }>;
-        startDate: z.ZodNullable<z.ZodDate>;
-        endDate: z.ZodNullable<z.ZodDate>;
-        author: z.ZodNullable<z.ZodString>;
-        contentUrl: z.ZodNullable<z.ZodString>;
-        mediaUrl: z.ZodNullable<z.ZodString>;
-        textBody: z.ZodNullable<z.ZodString>;
-        ownerId: z.ZodString;
-        owner: z.ZodOptional<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            email: z.ZodString;
-            role: z.ZodEnum<{
-                readonly SuperAdmin: "SUPER_ADMIN";
-                readonly CenterAdmin: "CENTER_ADMIN";
-                readonly Publisher: "PUBLISHER";
-            }>;
-            imageUrl: z.ZodNullable<z.ZodString>;
-            isActive: z.ZodBoolean;
-            centerId: z.ZodNullable<z.ZodString>;
-            center: z.ZodOptional<z.ZodObject<{
-                id: z.ZodString;
-                name: z.ZodString;
-                acronym: z.ZodString;
-                color: z.ZodString;
-                status: z.ZodEnum<{
-                    readonly Active: "ACTIVE";
-                    readonly Inactive: "INACTIVE";
-                }>;
-                buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                    id: z.ZodString;
-                    name: z.ZodString;
-                    description: z.ZodNullable<z.ZodString>;
-                    status: z.ZodEnum<{
-                        readonly Active: "ACTIVE";
-                        readonly Inactive: "INACTIVE";
-                    }>;
-                    centerId: z.ZodString;
-                    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    createdAt: z.ZodDate;
-                    updatedAt: z.ZodDate;
-                }, z.core.$strip>>>;
-                createdAt: z.ZodDate;
-                updatedAt: z.ZodDate;
-            }, z.core.$strip>>;
-            created_at: z.ZodCoercedDate<unknown>;
-            updated_at: z.ZodCoercedDate<unknown>;
-            temporaryPassword: z.ZodOptional<z.ZodString>;
-        }, z.core.$strip>>;
-        showTitle: z.ZodBoolean;
-        showAuthor: z.ZodBoolean;
-        showQrCode: z.ZodBoolean;
-        showTime: z.ZodBoolean;
-        showScreenName: z.ZodBoolean;
-        showTypeBadge: z.ZodBoolean;
-        showDeadline: z.ZodBoolean;
-        isCarousel: z.ZodBoolean;
-        isPrivate: z.ZodBoolean;
-        mediaFit: z.ZodDefault<z.ZodEnum<{
-            readonly Cover: "COVER";
-            readonly Contain: "CONTAIN";
-            readonly Fill: "FILL";
-            readonly Blur: "BLUR";
-        }>>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
-    }, z.core.$strip>>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
-}, z.core.$strip>;
-declare const playlistItemIdSchema: z.ZodObject<{
-    id: z.ZodString;
-}, z.core.$strip>;
-declare const playlistQuerySchema: z.ZodObject<{
-    buildingId: z.ZodOptional<z.ZodString>;
-    screenId: z.ZodOptional<z.ZodString>;
-}, z.core.$strip>;
-
-type CreatePlaylistItemDTO = z.infer<typeof createPlaylistItemSchema>;
-type UpdatePlaylistItemDTO = z.infer<typeof updatePlaylistItemSchema>;
-type PlaylistItemResponseDTO = z.infer<typeof playlistItemResponseSchema>;
-type ReorderPlaylistDTO = z.infer<typeof reorderPlaylistSchema>;
-
-declare const kioskPlaylistItemResponseSchema: z.ZodObject<{
-    id: z.ZodString;
-    duration: z.ZodNumber;
-    order: z.ZodNumber;
-    content: z.ZodObject<{
-        id: z.ZodString;
-        title: z.ZodString;
-        type: z.ZodEnum<{
-            readonly Image: "IMAGE";
-            readonly Video: "VIDEO";
-            readonly Notice: "NOTICE";
-            readonly WebUrl: "WEB_URL";
-        }>;
-        status: z.ZodEnum<{
-            readonly Draft: "DRAFT";
-            readonly Scheduled: "SCHEDULED";
-            readonly Active: "ACTIVE";
-            readonly Expired: "EXPIRED";
-            readonly Archived: "ARCHIVED";
-        }>;
-        startDate: z.ZodNullable<z.ZodDate>;
-        endDate: z.ZodNullable<z.ZodDate>;
-        author: z.ZodNullable<z.ZodString>;
-        contentUrl: z.ZodNullable<z.ZodString>;
-        mediaUrl: z.ZodNullable<z.ZodString>;
-        textBody: z.ZodNullable<z.ZodString>;
-        ownerId: z.ZodString;
-        owner: z.ZodOptional<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            email: z.ZodString;
-            role: z.ZodEnum<{
-                readonly SuperAdmin: "SUPER_ADMIN";
-                readonly CenterAdmin: "CENTER_ADMIN";
-                readonly Publisher: "PUBLISHER";
-            }>;
-            imageUrl: z.ZodNullable<z.ZodString>;
-            isActive: z.ZodBoolean;
-            centerId: z.ZodNullable<z.ZodString>;
-            center: z.ZodOptional<z.ZodObject<{
-                id: z.ZodString;
-                name: z.ZodString;
-                acronym: z.ZodString;
-                color: z.ZodString;
-                status: z.ZodEnum<{
-                    readonly Active: "ACTIVE";
-                    readonly Inactive: "INACTIVE";
-                }>;
-                buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                    id: z.ZodString;
-                    name: z.ZodString;
-                    description: z.ZodNullable<z.ZodString>;
-                    status: z.ZodEnum<{
-                        readonly Active: "ACTIVE";
-                        readonly Inactive: "INACTIVE";
-                    }>;
-                    centerId: z.ZodString;
-                    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    createdAt: z.ZodDate;
-                    updatedAt: z.ZodDate;
-                }, z.core.$strip>>>;
-                createdAt: z.ZodDate;
-                updatedAt: z.ZodDate;
-            }, z.core.$strip>>;
-            created_at: z.ZodCoercedDate<unknown>;
-            updated_at: z.ZodCoercedDate<unknown>;
-            temporaryPassword: z.ZodOptional<z.ZodString>;
-        }, z.core.$strip>>;
-        showTitle: z.ZodBoolean;
-        showAuthor: z.ZodBoolean;
-        showQrCode: z.ZodBoolean;
-        showTime: z.ZodBoolean;
-        showScreenName: z.ZodBoolean;
-        showTypeBadge: z.ZodBoolean;
-        showDeadline: z.ZodBoolean;
-        isCarousel: z.ZodBoolean;
-        isPrivate: z.ZodBoolean;
-        mediaFit: z.ZodDefault<z.ZodEnum<{
-            readonly Cover: "COVER";
-            readonly Contain: "CONTAIN";
-            readonly Fill: "FILL";
-            readonly Blur: "BLUR";
-        }>>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-declare const kioskPlaylistResponseSchema: z.ZodObject<{
-    screenName: z.ZodString;
-    lastUpdated: z.ZodNullable<z.ZodString>;
-    items: z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        duration: z.ZodNumber;
-        order: z.ZodNumber;
-        content: z.ZodObject<{
-            id: z.ZodString;
-            title: z.ZodString;
-            type: z.ZodEnum<{
-                readonly Image: "IMAGE";
-                readonly Video: "VIDEO";
-                readonly Notice: "NOTICE";
-                readonly WebUrl: "WEB_URL";
-            }>;
-            status: z.ZodEnum<{
-                readonly Draft: "DRAFT";
-                readonly Scheduled: "SCHEDULED";
-                readonly Active: "ACTIVE";
-                readonly Expired: "EXPIRED";
-                readonly Archived: "ARCHIVED";
-            }>;
-            startDate: z.ZodNullable<z.ZodDate>;
-            endDate: z.ZodNullable<z.ZodDate>;
-            author: z.ZodNullable<z.ZodString>;
-            contentUrl: z.ZodNullable<z.ZodString>;
-            mediaUrl: z.ZodNullable<z.ZodString>;
-            textBody: z.ZodNullable<z.ZodString>;
-            ownerId: z.ZodString;
-            owner: z.ZodOptional<z.ZodObject<{
-                id: z.ZodString;
-                name: z.ZodString;
-                email: z.ZodString;
-                role: z.ZodEnum<{
-                    readonly SuperAdmin: "SUPER_ADMIN";
-                    readonly CenterAdmin: "CENTER_ADMIN";
-                    readonly Publisher: "PUBLISHER";
-                }>;
-                imageUrl: z.ZodNullable<z.ZodString>;
-                isActive: z.ZodBoolean;
-                centerId: z.ZodNullable<z.ZodString>;
-                center: z.ZodOptional<z.ZodObject<{
-                    id: z.ZodString;
-                    name: z.ZodString;
-                    acronym: z.ZodString;
-                    color: z.ZodString;
-                    status: z.ZodEnum<{
-                        readonly Active: "ACTIVE";
-                        readonly Inactive: "INACTIVE";
-                    }>;
-                    buildings: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                        id: z.ZodString;
-                        name: z.ZodString;
-                        description: z.ZodNullable<z.ZodString>;
-                        status: z.ZodEnum<{
-                            readonly Active: "ACTIVE";
-                            readonly Inactive: "INACTIVE";
-                        }>;
-                        centerId: z.ZodString;
-                        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                        createdAt: z.ZodDate;
-                        updatedAt: z.ZodDate;
-                    }, z.core.$strip>>>;
-                    createdAt: z.ZodDate;
-                    updatedAt: z.ZodDate;
-                }, z.core.$strip>>;
-                created_at: z.ZodCoercedDate<unknown>;
-                updated_at: z.ZodCoercedDate<unknown>;
-                temporaryPassword: z.ZodOptional<z.ZodString>;
-            }, z.core.$strip>>;
-            showTitle: z.ZodBoolean;
-            showAuthor: z.ZodBoolean;
-            showQrCode: z.ZodBoolean;
-            showTime: z.ZodBoolean;
-            showScreenName: z.ZodBoolean;
-            showTypeBadge: z.ZodBoolean;
-            showDeadline: z.ZodBoolean;
-            isCarousel: z.ZodBoolean;
-            isPrivate: z.ZodBoolean;
-            mediaFit: z.ZodDefault<z.ZodEnum<{
-                readonly Cover: "COVER";
-                readonly Contain: "CONTAIN";
-                readonly Fill: "FILL";
-                readonly Blur: "BLUR";
-            }>>;
-            createdAt: z.ZodDate;
-            updatedAt: z.ZodDate;
-        }, z.core.$strip>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-
-type KioskPlaylistResponseDTO = z.infer<typeof kioskPlaylistResponseSchema>;
-type KioskPlaylistItemDTO = z.infer<typeof kioskPlaylistItemResponseSchema>;
-
-declare const dashboardCenterInfraSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    acronym: z.ZodNullable<z.ZodString>;
-    color: z.ZodNullable<z.ZodString>;
-    buildingsCount: z.ZodNumber;
-    screensCount: z.ZodOptional<z.ZodNumber>;
-    onlineScreensCount: z.ZodOptional<z.ZodNumber>;
-}, z.core.$strip>;
-declare const dashboardRecentActivitySchema: z.ZodObject<{
-    id: z.ZodString;
-    title: z.ZodString;
-    type: z.ZodString;
-    status: z.ZodString;
-    author: z.ZodNullable<z.ZodString>;
-    createdAt: z.ZodDate;
-    updatedAt: z.ZodDate;
-}, z.core.$strip>;
-declare const dashboardStatsSchema: z.ZodObject<{
-    totalContents: z.ZodNumber;
-    activeContents: z.ZodNumber;
-    pendingContents: z.ZodNumber;
-    contentsByStatus: z.ZodRecord<z.ZodString, z.ZodNumber>;
-    contentsByType: z.ZodRecord<z.ZodString, z.ZodNumber>;
-    totalScreens: z.ZodNumber;
-    onlineScreens: z.ZodNumber;
-    offlineScreens: z.ZodNumber;
-    screensByStatus: z.ZodRecord<z.ZodString, z.ZodNumber>;
-    totalCenters: z.ZodNumber;
-    totalBuildings: z.ZodNumber;
-    totalUsers: z.ZodNumber;
-    centersInfrastructure: z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        acronym: z.ZodNullable<z.ZodString>;
-        color: z.ZodNullable<z.ZodString>;
-        buildingsCount: z.ZodNumber;
-        screensCount: z.ZodOptional<z.ZodNumber>;
-        onlineScreensCount: z.ZodOptional<z.ZodNumber>;
-    }, z.core.$strip>>;
-    recentActivities: z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        title: z.ZodString;
-        type: z.ZodString;
-        status: z.ZodString;
-        author: z.ZodNullable<z.ZodString>;
-        createdAt: z.ZodDate;
-        updatedAt: z.ZodDate;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-declare const dashboardMapScreenSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    ip: z.ZodNullable<z.ZodString>;
-    status: z.ZodString;
-    isPrivate: z.ZodBoolean;
-}, z.core.$strip>;
-declare const dashboardMapBuildingSchema: z.ZodObject<{
-    id: z.ZodString;
-    name: z.ZodString;
-    description: z.ZodNullable<z.ZodString>;
-    centerName: z.ZodString;
-    centerAcronym: z.ZodNullable<z.ZodString>;
-    centerColor: z.ZodNullable<z.ZodString>;
-    latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    screensCount: z.ZodNumber;
-    onlineScreensCount: z.ZodNumber;
-    offlineScreensCount: z.ZodNumber;
-    coordinates: z.ZodObject<{
-        ipBased: z.ZodObject<{
-            latitude: z.ZodNumber;
-            longitude: z.ZodNumber;
-            isFallback: z.ZodBoolean;
-        }, z.core.$strip>;
-        buildingBased: z.ZodObject<{
-            latitude: z.ZodNumber;
-            longitude: z.ZodNumber;
-            isConfigured: z.ZodBoolean;
-        }, z.core.$strip>;
-    }, z.core.$strip>;
-    screens: z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        ip: z.ZodNullable<z.ZodString>;
-        status: z.ZodString;
-        isPrivate: z.ZodBoolean;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-declare const dashboardMapResponseSchema: z.ZodObject<{
-    center: z.ZodObject<{
-        latitude: z.ZodNumber;
-        longitude: z.ZodNumber;
-    }, z.core.$strip>;
-    bounds: z.ZodObject<{
-        southwest: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
-        northeast: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
-    }, z.core.$strip>;
-    buildings: z.ZodArray<z.ZodObject<{
-        id: z.ZodString;
-        name: z.ZodString;
-        description: z.ZodNullable<z.ZodString>;
-        centerName: z.ZodString;
-        centerAcronym: z.ZodNullable<z.ZodString>;
-        centerColor: z.ZodNullable<z.ZodString>;
-        latitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        longitude: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        screensCount: z.ZodNumber;
-        onlineScreensCount: z.ZodNumber;
-        offlineScreensCount: z.ZodNumber;
-        coordinates: z.ZodObject<{
-            ipBased: z.ZodObject<{
-                latitude: z.ZodNumber;
-                longitude: z.ZodNumber;
-                isFallback: z.ZodBoolean;
-            }, z.core.$strip>;
-            buildingBased: z.ZodObject<{
-                latitude: z.ZodNumber;
-                longitude: z.ZodNumber;
-                isConfigured: z.ZodBoolean;
-            }, z.core.$strip>;
-        }, z.core.$strip>;
-        screens: z.ZodArray<z.ZodObject<{
-            id: z.ZodString;
-            name: z.ZodString;
-            ip: z.ZodNullable<z.ZodString>;
-            status: z.ZodString;
-            isPrivate: z.ZodBoolean;
-        }, z.core.$strip>>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-
-type DashboardCenterInfraDTO = z.infer<typeof dashboardCenterInfraSchema>;
-type DashboardRecentActivityDTO = z.infer<typeof dashboardRecentActivitySchema>;
-type DashboardStatsDTO = z.infer<typeof dashboardStatsSchema>;
-type DashboardMapScreenDTO = z.infer<typeof dashboardMapScreenSchema>;
-type DashboardMapBuildingDTO = z.infer<typeof dashboardMapBuildingSchema>;
-type DashboardMapResponseDTO = z.infer<typeof dashboardMapResponseSchema>;
-
 declare const SystemStatus: {
     readonly Active: "ACTIVE";
     readonly Inactive: "INACTIVE";
@@ -1045,4 +710,4 @@ declare function minutesToDecimalHours(minutes: number): number;
  */
 declare function formatMinutesToReadable(minutes: number): string;
 
-export { AuthEnums, type BuildingIdDTO, type BuildingQueryDTO, type BuildingResponseDTO, type CenterIdDTO, type CenterQueryDTO, type CenterResponseDTO, type ContentIdDTO, type ContentQueryDTO, type ContentResponseDTO, ContentStatus, ContentType, type CreateBuildingDTO, type CreateCenterDTO, type CreateContentDTO, type CreatePlaylistItemDTO, type CreateScreenDTO, type CreateUserDTO, type DashboardCenterInfraDTO, type DashboardMapBuildingDTO, type DashboardMapResponseDTO, type DashboardMapScreenDTO, type DashboardRecentActivityDTO, type DashboardStatsDTO, type EnumContentStatus, type EnumContentType, type EnumLoginStatus, type EnumMediaFit, type EnumPairingRequestStatus, type EnumScreenStatus, type EnumSystemStatus, type EnumUserRole, type KioskPlaylistItemDTO, type KioskPlaylistResponseDTO, type LoginAuthDTO, MediaFit, type PaginatedBuildingsDTO, type PaginatedCentersDTO, type PaginatedContentsDTO, type PaginatedResultDTO, type PaginatedScreensDTO, type PaginatedUsersDTO, type PaginationMetaDTO, type PaginationQueryDTO, PairingRequestStatus, type PlaylistItemResponseDTO, type ProblemDetailsDTO, type ReorderPlaylistDTO, type ScreenIdDTO, type ScreenQueryDTO, type ScreenResponseDTO, ScreenStatus, SystemStatus, type TokenPayloadDTO, type UpdateBuildingDTO, type UpdateCenterDTO, type UpdateContentDTO, type UpdateContentStatusDTO, type UpdatePlaylistItemDTO, type UpdateScreenDTO, type UpdateUserDTO, type UploadResponseDTO, type UserIdDTO, type UserResponseDTO, UserRole, buildingIdSchema, buildingQuerySchema, buildingResponseSchema, centerIdSchema, centerQuerySchema, centerResponseSchema, contentIdSchema, contentQuerySchema, contentResponseSchema, createBuildingSchema, createCenterSchema, createContentSchema, createPaginatedResponseSchema, createPlaylistItemSchema, createScreenSchema, createUserSchema, dashboardCenterInfraSchema, dashboardMapBuildingSchema, dashboardMapResponseSchema, dashboardMapScreenSchema, dashboardRecentActivitySchema, dashboardStatsSchema, formatMinutesToReadable, ipv4Schema, kioskPlaylistItemResponseSchema, kioskPlaylistResponseSchema, loginSchema, minutesToDecimalHours, paginationMetaSchema, paginationSchema, playlistItemIdSchema, playlistItemResponseSchema, playlistQuerySchema, refreshTokenSchema, registry, reorderPlaylistSchema, rfc7807ErrorSchema, screenIdSchema, screenIpSchema, screenQuerySchema, screenResponseSchema, timeStringToMinutes, updateBuildingSchema, updateCenterSchema, updateContentSchema, updateContentStatusSchema, updatePlaylistItemSchema, updateScreenSchema, updateUserSchema, uploadResponseSchema, userIdSchema, userResponseSchema };
+export { AcademicLevel, type AcademicMemoryDTO, type ApplicationDTO, ApplicationStatus, AuthEnums, type CreateApplicationDTO, type CreateCheckoutSessionDTO, type CreateExperienceDTO, type CreateMemoryDTO, type CreateOpportunityDTO, type EnumAcademicLevel, type EnumApplicationStatus, type EnumExperienceStatus, type EnumExperienceType, type EnumLoginStatus, type EnumMemoryFormat, type EnumMemoryType, type EnumOpportunityCategory, type EnumOpportunityModality, type EnumOpportunityStatus, type EnumSolidaryStatus, type EnumStudentShift, type EnumSystemStatus, type EnumTransactionType, type EnumUserRole, type ExperienceDTO, ExperienceStatus, ExperienceType, type LoginAuthDTO, MemoryFormat, MemoryType, OpportunityCategory, type OpportunityDTO, type OpportunityFilterQueryDTO, OpportunityModality, OpportunityStatus, type PaginatedResultDTO, type PaginationMetaDTO, type PaginationQueryDTO, type ProblemDetailsDTO, type RechargeSimulationResultDTO, type RefreshTokenDTO, type RegisterStudentDTO, type SimulateRechargeDTO, SolidaryStatus, StudentEnums, type StudentProfileDTO, SystemStatus, type TokenPayloadDTO, type TokenTransactionDTO, TransactionType, type UpdateApplicationStatusDTO, type UpdateExperienceDTO, type UpdateMemoryDTO, type UpdateOpportunityDTO, type UpdateStudentProfileDTO, type UploadResponseDTO, type UserResponseDTO, UserRole, type UserWalletDTO, applicationSchema, createApplicationSchema, createCheckoutSessionSchema, createExperienceSchema, createMemorySchema, createOpportunitySchema, createPaginatedResponseSchema, experienceSchema, formatMinutesToReadable, ipv4Schema, loginSchema, memorySchema, minutesToDecimalHours, opportunityFilterQuerySchema, opportunitySchema, paginationMetaSchema, paginationSchema, rechargeSimulationResultSchema, refreshTokenSchema, registerStudentSchema, registry, rfc7807ErrorSchema, simulateRechargeSchema, studentProfileSchema, timeStringToMinutes, tokenTransactionSchema, updateApplicationStatusSchema, updateExperienceSchema, updateMemorySchema, updateOpportunitySchema, updateStudentProfileSchema, uploadResponseSchema, userResponseSchema, userWalletSchema };

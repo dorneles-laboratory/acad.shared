@@ -9,6 +9,14 @@ export const AuthEnums = {
   } as const,
 };
 
+export const UserRole = {
+  Student: 'STUDENT',
+  Admin: 'ADMIN',
+  Advisor: 'ADVISOR',
+} as const;
+
 // Export the types to control values.
 export type EnumLoginStatus =
   (typeof AuthEnums.LoginStatus)[keyof typeof AuthEnums.LoginStatus];
+
+export type EnumUserRole = (typeof UserRole)[keyof typeof UserRole];
