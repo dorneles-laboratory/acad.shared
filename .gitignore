@@ -22,3 +22,5 @@ Thumbs.db
 # Arquivos de cache do editor/outros
 *.bak
 *.tmp
+# Local shared package archives
+lib-shared*.tgz
